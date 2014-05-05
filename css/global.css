@@ -1,0 +1,23 @@
+.logo {
+	display: table;
+	margin: 0 auto;
+}
+/* css valid for all projects that use this library */
+.invisible
+{
+	display: none;
+}
+/* auto resize the profile picture to a smal version (this is suboptimal, because large profile pictures will cause problems here, better rework this
+so that php saves a downsized version of the profile picture here */
+.profilePicture
+{
+	width: 115px;
+	height: 115px;
+}
+/* border surrounding profile picture */
+.profilePictureParent
+{
+	border: 1px solid;
+	width: 115px;
+	height: 115px;
+}

@@ -1,0 +1,23 @@
+/* css valid for all files of this project */
+body,html {
+	height: 100%;
+}
+/* hide output fields initially, fade them in when needed */
+.status {
+	display: none;
+    float: left;
+    height: 22px;
+    position: relative;
+    width: 100%;
+}
+/* so that "home" button left top corner displays custom logo icon */
+.ui-icon-logo {
+	background-image: url("../../projectname/images/opensource_icon_18x18.png");
+}
+/* for devices with large screens highres */
+@media only screen and (-webkit-min-device-pixel-ratio: 2) {
+	.ui-icon-logo {
+		background-image: url("../../projectname/images/opensource_icon.png");
+		background-size: 18px 18px;
+	}
+}
