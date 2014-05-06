@@ -1,0 +1,7 @@
+# eclipse generated project setting file  #
+# you will need to rename this file .gitignore in order for it to work #
+.*
+.project
+.settings
+*.log
+php_errors.log
