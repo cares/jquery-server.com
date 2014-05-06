@@ -1,5 +1,6 @@
 <?php
 require_once("config/config.php");
+require_once("lib_general.php");
 global $errors;
 $mysqli_link = null;
 global $mysqli_link; // a pointer symbolizing the connection to the mysql database
@@ -55,15 +56,20 @@ class class_mysqli_interface {
 		$output .= " <error>".utf8_encode(mysqli_error())." </error>\n";
 		*/
 
+		// establish connection to database
 		$mysqli_link = mysqli_connect($settings_database_server, $settings_database_user, $settings_database_pass, $settings_database_name);
-		$mysqli_link->set_charset($settings_database_charset);
 
 		if (!$mysqli_link)
 		{
+			// failed
 			// something went wrong, find out what and send back details to jquery-ajax-request
 			$error_details = mysqli_connect_errno().":".mysqli_connect_error();
-			$output = 'type:error,id:mysqli_connect failed,details:'.$error_details;
-			exit($output);
+			DisplayServerStatusMessage(null,"database","failed","failed","could not establish connection to database. reason: ".$error_details);
+		}
+		else
+		{
+			// success
+			$mysqli_link->set_charset($settings_database_charset);
 		}
 	}
 
@@ -139,7 +145,8 @@ class class_mysqli_interface {
 				$settings_datasource = str_replace(":", " ", $settings_datasource);
 
 				$output = 'type:error,id:database error,details:'.$error.',datasource:'.$settings_datasource;
-				trigger_error($output);
+				
+				// trigger_error($output);
 			}
 
 			if($return_data)

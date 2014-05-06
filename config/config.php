@@ -1,8 +1,8 @@
 <?php
 /* ======================= ABOUT THE PLATFORM */
-$settings_platform_name = "gigalaunch";
+$settings_platform_name = "jquery-server.com";
 $settings_platform_logo = "images/projectlogo.png";
-$settings_platform_url = "http://gigalaunch.de";
+$settings_platform_url = "http://jquery-server.com";
 $settings_errorLog = $settings_platform_name."_error.log"; // if empty, no errors are logged to file
 
 $settings_log_errors = "log/error.log"; // if errors should be logged to file, if not leave this empty
@@ -17,7 +17,7 @@ $settings_debug_mode = true; // if you want additional info about whats going on
 /* here the database credentials are beeing stored */
 $settings_datasource = "mysql"; // right now can only be "mysql", could be postgress (not implemented) sqlite (not implemented)
 $settings_database_server = "localhost";
-$settings_database_name = $settings_platform_name;
+$settings_database_name = "jquery-server.com";
 $settings_database_user = "root";
 $settings_database_pass = "root";
 $settings_database_auth_table = "passwd"; // what the table is called, where the users & passwords (md5 hashes) are stored

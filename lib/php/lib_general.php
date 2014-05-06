@@ -1,6 +1,7 @@
 <?php
 require_once('lib_array_and_objects.php');
 require_once('lib_convert.php');
+require_once('lib_file.php');
 
 /* just very general functions, is included via config.php
  * so that it is available to all files */
@@ -26,7 +27,7 @@ function getREQUESTSstarting($with)
 	return $result;
 }
 
-/* define the format of the server answer/result/message
+/* define the format of the server DisplayServerStatusMessage/result/message
  *
  * ===== input:
  * 
@@ -49,20 +50,29 @@ function getREQUESTSstarting($with)
  * {action":"login","resultType":"success","resultValue":"success","details":"you have now access. live long and prosper! Login expires in 30 minutes."}
  * 
  * */
-function answer($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
+function DisplayServerStatusMessage($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
 {
 	if(!$result)
 	{
 		$result = Array();
 	}
 	
+	$result["version"] = "jquery-server.com_protocol1.0";
 	$result["action"] = $action;
 	$result["resultType"] = $resultType;
 	$result["resultValue"] = $resultValue;
 	$result["details"] = $details;
+	$json_string = json_encode($result);
+	$json_string = "§§" . $json_string . "§§"; // §§ <- marks the beginning and the end of the message (there might be php-warnings going prior this which will be cut away = ignored by the client)
 	
-	// give answer to client
-	echo json_encode($result);
+	global $settings_log_errors;
+	if(!empty($settings_log_errors))
+	{
+		log2file($settings_log_errors,$json_string);
+	}
+	
+	// give DisplayServerStatusMessage to client
+	exit($json_string); // same as die
 }
 
 
@@ -150,10 +160,4 @@ function operation($operation)
 	if(!empty($settings_log_operations)){
 		log2file($settings_log_operations,$operation);
 	}
-}
-
-/* write the error to a log file */
-function log2file($file,$this)
-{
-	file_put_contents($file, time().": ".$this."\n", FILE_APPEND);
 }

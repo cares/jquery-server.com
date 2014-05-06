@@ -17,7 +17,7 @@
 <!-- Custom styles for this template -->
 <link href="css/signin.css" rel="stylesheet">
 
-<!-- global gigalaunch -->
+<!-- global jquery-server.com -->
 <link href="css/global.css" type="text/css" rel="stylesheet"/>
 
 <!-- Just for debugging purposes. Don't actually copy this line! -->
@@ -32,8 +32,8 @@
 
 <body>
 	<div class="container">
-		<div class="logo"></div> <!-- where the logo (as configured in conf/config.php will be shown -->
-		<form class="form-signin" action="login_backend.php" onsubmit="javascript: return false;">
+		<div class="logo"><img width="300px" src="images/projectlogo.png"></div> <!-- where the logo (as configured in conf/config.php will be shown -->
+		<form class="form-signin" action="http://localhost/jquery-server.com/login_backend.php" onsubmit="javascript: return false;">
 			<h2 class="form-signin-heading">Please sign in</h2>
 			<!-- credentials -->
 			<!-- username input -->
@@ -67,7 +67,7 @@
     	$('.form-signin').submit(function() {
     	    submitForm('.form-signin',	function(result)
 					    	    	    {
-					    					ServerStatusMessage(result,$(".error_div")); // visualize the response
+					    					DisplayServerStatusMessage(result,$(".error_div")); // visualize the response
 					
 					    					// after a successful login
 					    					if((result["action"] == "login") && (result["resultType"] == "success"))

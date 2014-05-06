@@ -55,19 +55,19 @@ if(!empty($_REQUEST['username']) && !empty($_REQUEST['password_encrypted']))
 
 				$result["goto"] = $home; // header("Location: ".$home);
 				$result["expires"] = seconds2minutes($settings_login_session_timeout);
-				answer($result,"login","success","success","you have now access. live long and prosper! Login expires in ".seconds2minutes($settings_login_session_timeout)." minutes.");
+				DisplayServerStatusMessage($result,"login","success","success","you have now access. live long and prosper! Login expires in ".seconds2minutes($settings_login_session_timeout)." minutes.");
 			}
 			else
 			{
-				answer(null,"login","failed","failed","session expired please login again.");
+				DisplayServerStatusMessage(null,"login","failed","failed","session expired please login again.");
 			}
 		}
 		else
 		{
-			answer(null,"login","failed","failed","wrong username or password.");
+			DisplayServerStatusMessage(null,"login","failed","failed","wrong username or password.");
 		}
 	} else {
-		answer(null,"login","failed","failed","wrong username or password.");
+		DisplayServerStatusMessage(null,"login","failed","failed","wrong username or password.");
 	}
 }	
 ?>

@@ -1,0 +1,34 @@
+========== definitions ==========
+
+will define/explain certain standards/protocols.
+
+====== synonyms
+
+what are synonyms?
+
+synonyms are multiple words for one "thing"
+
+example:
+
+=== result ===
+
+result = answer = response = output... all kind of the same thing. result will be used as default.
+
+====== json DisplayServerStatusMessage from server ======
+
+the server DisplayServerStatusMessages with a json-string containing the following:
+
+	$result["version"] = "§§jquery-server.com_protocol1.0"; <- this marks the beginning of the message (there might be php-warnings going prior this which will be cut away = ignored by the client)
+	$result["action"] = $action;
+	$result["resultType"] = $resultType;
+	$result["resultValue"] = $resultValue;
+	$result["details"] = $details;
+	$result["finishTag"] = "§§"; <- this marks the end of the message
+
+the js-client will cut away everything prior to the first § and everything that follows the last §.
+
+(hopefully only) leaving: {key:value,key2:value2} for further processing which contians the actual informations from the server.
+
+so the content of a message can contain multiple § but never two §§ right after each other.
+
+well you need to define these separators somehow.

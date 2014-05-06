@@ -264,7 +264,7 @@ o test profile picture upload :-D
 			var url = "lib/php/lib_users_and_groups.php?";
 			submitUrl(url,data,function(result)
 		    	    {
-						ServerStatusMessage(result,$(".error_div")); // visualize the response
+						DisplayServerStatusMessage(result,$(".error_div")); // visualize the response
 
 						$("#confirm_deletion").fadeOut(400); // hide the confirm dialog
 						$("#action").val(""); // reset action
@@ -351,7 +351,7 @@ o test profile picture upload :-D
             
 		        submitForm(this,function(result)
 			    	    	    {
-			    					ServerStatusMessage(result,$(".error_div")); // visualize the response
+			    					DisplayServerStatusMessage(result,$(".error_div")); // visualize the response
 
 			    					if(result["resultType"] == "success")
 			    					{
