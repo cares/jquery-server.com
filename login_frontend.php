@@ -1,3 +1,30 @@
+<?php
+/*
+======== purpose of this file:
+allow users to login / forward them to registration form
+
+======== methology:
+o no refresh of the page should be necessary to complete any command
+-> all commands will be send to backend via jquery-ajax requests.
+
+====== TODO
+
+=== detect language of user
+o even before the user logs in, infdex.php should detect the browser's language
+and display the frontend_login.php in the correct language
+
+====== TestDocumentation
+
+==== commands
+
+=== login [implemented and tested]
+o after correct login/auth
+-> you should get redireted to the page defined in mysql->jquery_server->passwd->home of the user
+
+o wrong username/password
+-> display orange warning: "failed: login wrong username or password."
+*/
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +39,7 @@
 <title>login with your bootstrapped on</title>
 
 <!-- Bootstrap core CSS -->
-<link href="css/bootstrap.css" rel="stylesheet">
+<link href="css/bootstrap_modified.css" rel="stylesheet">
 
 <!-- Custom styles for this template -->
 <link href="css/signin.css" rel="stylesheet">

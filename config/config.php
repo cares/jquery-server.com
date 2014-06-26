@@ -11,20 +11,32 @@ $settings_log_operations = "log/operations.log"; // if there should be a line wr
 $settings_uniqueUsernames = true; // please leave this at true, otherwise useredit may fail, true: two users can NOT have the same username, false: two users can have the same username (identification is mainly done over an unique database generated id)
 
 /* ======================= DEVELOPMENT */
+global $settings_debug_mode;
 $settings_debug_mode = true; // if you want additional info about whats going on. will also perserve xdebug ?Session parameters.
 
 /* ======================= DATABASE */
 /* here the database credentials are beeing stored */
+global $settings_datasource;
 $settings_datasource = "mysql"; // right now can only be "mysql", could be postgress (not implemented) sqlite (not implemented)
+global $settings_database_server;
 $settings_database_server = "localhost";
-$settings_database_name = "jquery-server.com";
+global $settings_database_name;
+$settings_database_name = "jquery_server";
+global $settings_database_user;
 $settings_database_user = "root";
+global $settings_database_pass;
 $settings_database_pass = "root";
+global $settings_database_auth_table;
 $settings_database_auth_table = "passwd"; // what the table is called, where the users & passwords (md5 hashes) are stored
+global $settings_database_groups_table;
 $settings_database_groups_table = "groups"; // what the table is called, where the groups are stored
+global $settings_lastDatabase;
 $settings_lastDatabase = "";
+global $settings_lastTable;
 $settings_lastTable = "";
+global $settings_lastColumn;
 $settings_lastColumn = "";
+global $settings_database_charset;
 $settings_database_charset = "utf8"; // if you want special chars to be properly displayed in the database/phpmyadmin etc.
 
 /* ======================= USERS */

@@ -15,7 +15,12 @@ global $output;
 $output = ""; // contains the last error message
 
 /* mysqli.php
- * 1. loads config.php (database credentials) per default
+* usecases:
+* o check if database exists
+* o drop database
+* o create database
+* 
+* 1. loads config.php (database credentials) per default
 * 2. establishes a link to the mysql database
 * 3. selects a default database (the one given in config/config.php)
 * 4. handles all mysql interaction, databaseresults are returned as Array.
@@ -56,15 +61,23 @@ class class_mysqli_interface {
 		$output .= " <error>".utf8_encode(mysqli_error())." </error>\n";
 		*/
 
-		// establish connection to database
+		// establish connection to a specific database called $settings_database_name
 		$mysqli_link = mysqli_connect($settings_database_server, $settings_database_user, $settings_database_pass, $settings_database_name);
 
-		if (!$mysqli_link)
+		if(!$mysqli_link)
 		{
-			// failed
-			// something went wrong, find out what and send back details to jquery-ajax-request
-			$error_details = mysqli_connect_errno().":".mysqli_connect_error();
-			DisplayServerStatusMessage(null,"database","failed","failed","could not establish connection to database. reason: ".$error_details);
+			// failed, try to connect without specifying a database
+			$mysqli_link = mysqli_connect($settings_database_server, $settings_database_user, $settings_database_pass);
+			if(!$mysqli_link)
+			{
+				$error_details = mysqli_connect_errno().":".mysqli_connect_error();
+				DisplayServerStatusMessage(null,"database","failed","failed","could not establish connection to database. reason: ".$error_details);
+			}
+			else
+			{
+				// success
+				$mysqli_link->set_charset($settings_database_charset);
+			}
 		}
 		else
 		{
@@ -74,7 +87,8 @@ class class_mysqli_interface {
 	}
 
 	/* send query to database and return each element as key=>value array
-	 *
+	 * if $database_name is not given, the default database $settings_database_name will be used.
+	 * 
 	* "$output" = Array [3]
 	0 = Array [5]
 	ID = 2
@@ -91,7 +105,7 @@ class class_mysqli_interface {
 	* true means: parse the mysql-result and return all data that is there (select = read)
 	* false means: i do not expect any data to be returned (insert/update does not read any data)
 	*/
-	public static function query($query,$return_data = true)
+	public static function query($query,$database_name = "",$return_data = true)
 	{
 		global $output;
 		global $worked;
@@ -106,28 +120,40 @@ class class_mysqli_interface {
 
 		$output = array();
 
-		$detectCreateDatabase = substr($query, 0, 15);
-		if("CREATE DATABASE" == $detectCreateDatabase)
+		// if $database_name is not given, the default database $settings_database_name will be used.
+		if(empty($database_name)) $database_name = $settings_database_name;
+		
+		if("CREATE DATABASE" == substr($query, 0, 15))
+		{
+			$result = true;
+		}
+		else if("DROP DATABASE" == substr($query, 0, 13))
+		{
+			$result = true;
+		}
+		else if("SHOW DATABASES" == substr($query, 0, 14))
 		{
 			$result = true;
 		}
 		else
 		{
-			$result = $mysqli_link->select_db($settings_database_name);
+			if($database_name) $result = $mysqli_link->select_db($database_name);
 		}
 
 		if(!$result)
 		{
-			// could not select database, something went wrong
+			// could not select database, something went wrong, check if the database exists
 			$worked = false;
 
 			// check if database exists
-			$query = "SHOW DATABASES;";
-			$result = mysqli_query($query);
-			// $id_last = mysqli_insert_id($mysqli_link);
-
-			$output = "type:error,id:select_db failed,details:"." Selecting database failed: ".mysqli_connect_error();
-			trigger_error($output);
+			if(databaseExists($database_name))
+			{
+				$output = "type:error,id:db exists but select_db failed,details:".mysqli_connect_error();
+			}
+			else
+			{
+				$output = "type:error,id:db does not exist,details:".mysqli_connect_error();
+			}
 		}
 		else
 		{
@@ -179,6 +205,28 @@ class class_mysqli_interface {
 		global $mysqli_object;
 		global $mysqli_link;
 		return mysqli_escape_string($mysqli_link,$input);
+	}
+	
+	/* test if a given database exists */
+	public static function databaseExists($database_name)
+	{
+		global $mysqli_object;
+		$result = false;
+	
+		$query = "SHOW DATABASES;";
+		$databases_array = $mysqli_object->query($query);
+		// $id_last = mysqli_insert_id($mysqli_link);
+		
+		$target = count($databases_array);
+		for($i=0;$i<$target;$i++)
+		{
+			if($database_name == $databases_array[$i]->Database)
+			{
+				$result = true;
+			}
+		}
+		
+		return $result;
 	}
 }
 ?>

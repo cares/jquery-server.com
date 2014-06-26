@@ -1236,6 +1236,8 @@ return $mysqli_object->query("SELECT * FROM `inputs` ".$where);
 /* load sql-commands from a sql file */
 function loadSQLFromFile($url)
 {
+	$worked = false;
+
 	// ini_set ( 'memory_limit', '512M' );
 	// set_time_limit ( 0 );
 
@@ -1244,63 +1246,56 @@ function loadSQLFromFile($url)
 	
 	$sql_query = "";
 	
+	$path = getcwd();
 	// read line by line
 	$lines = file($url);
-	$count = count($lines);
-
-	for($i = 0;$i<$count;$i++)
+	
+	if($lines)
 	{
-		$line = $lines[$i];
-		$cmd3 = substr($line, 0, 3);
-		$cmd4 = substr($line, 0, 4);
-		$cmd6 = substr($line, 0, 6);
-		if($cmd3 == "USE")
+		$count = count($lines);
+	
+		for($i = 0;$i<$count;$i++)
 		{
-			// cut away USE ``;
-			$settings_database_name = substr($line, 5, -3);
-		}
-		else if($cmd4 == "DROP")
-		{
-			$mysqli_object->query($line); // execute this line
-		}
-		else if(($cmd6 == "INSERT") || ($cmd6 == "CREATE"))
-		{
-			// sum all lines up until ; is detected
-			$multiline = $line;
-			while(!strstr($line, ';'))
+			$line = $lines[$i];
+			$cmd3 = substr($line, 0, 3);
+			$cmd4 = substr($line, 0, 4);
+			$cmd6 = substr($line, 0, 6);
+			if($cmd3 == "USE")
 			{
-				$i++;
-				$line = $lines[$i];
-				$multiline .= $line;
+				// cut away USE ``;
+				$settings_database_name = substr($line, 5, -3);
 			}
-			$multiline = str_replace("\n", "", $multiline); // remove newlines/linebreaks
-			$mysqli_object->query($multiline); // execute this line
-		}		
+			else if($cmd4 == "DROP")
+			{
+				$mysqli_object->query($line); // execute this line
+			}
+			else if(($cmd6 == "INSERT") || ($cmd6 == "CREATE"))
+			{
+				// sum all lines up until ; is detected
+				$multiline = $line;
+				while(!strstr($line, ';'))
+				{
+					$i++;
+					$line = $lines[$i];
+					$multiline .= $line;
+				}
+				$multiline = str_replace("\n", "", $multiline); // remove newlines/linebreaks
+				$output = $mysqli_object->query($multiline); // execute this line
+			}		
+		}
 	}
 
 	return $worked;
 }
 
 /* check if a given database exists */
-function databaseExists($settings_database_name)
+function databaseExists($database_name)
 {
 	$result = false;
-	global $mysqli_object; global $worked; $worked = false; global $output; $output = "";
-	global $settings_database_name; global $settings_lastDatabase;
-	
-	$query = "SHOW DATABASES;";
-	$allDatabaseNames = $mysqli_object->query($query);
-	
-	$target = count($allDatabaseNames);
-	for($i=0;$i<$target;$i++)
-	{
-		if($settings_database_name == $allDatabaseNames[$i]->Database)
-		{
-			$result = true;
-			break;
-		}
-	}
-	
+	global $mysqli_object;
+
+	$result = $mysqli_object->databaseExists($database_name);
+
 	return $result;
 }
 ?>

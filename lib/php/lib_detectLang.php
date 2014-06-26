@@ -64,7 +64,7 @@ function detectLang($verbose = "")
 	// if the detected language, is none of the available languages -> set it to english/us default
 	if(($lang != "de") && ($lang != "us") && ($lang != "es") && ($lang != "pt") && ($lang != "ru") && ($lang != "cz") && ($lang != "pl")) // && ($lang != "it") && ($lang != "fr")
 	{
-		$lang = "us";
+		$lang = "en";
 	}
 
 	return $lang;

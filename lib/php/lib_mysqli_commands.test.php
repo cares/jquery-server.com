@@ -7,7 +7,7 @@ include_once("config/config.php");
 echo "<hr><h1 color='red'>test database user management commands</h1><br>";
 
 comment("create database");
-loadSQLFromFile("./lib/php/lib_mysqli_commands.test.sql");
+loadSQLFromFile("../../db/mysql/lib_mysqli_commands.test.sql");
 success();
 
 comment("get definition of user from database");
