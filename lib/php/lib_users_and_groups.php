@@ -8,7 +8,6 @@ $allowed_users = "only logged in users"; // a list of userIDs that are allowed t
 $allowed_groups = "root"; // a list of groups, that are allowed to access this page
 require_once('./lib/php/lib_security.php'); // will mysql-real-escape all input
 require_once('./lib/php/lib_mysqli_commands.php');
-require_once("config/config.php"); // load project-config file
 // // login needs to be open for all in order to login! require_once('./lib/php/lib_session.php'); // will immediately exit and redirect to login if the session is not valid/has expired/user is not allowed to access the page
 /* ================= */
 
@@ -27,11 +26,11 @@ if(isset($_REQUEST["action"]))
 
 		if($users)
 		{
-			DisplayServerStatusMessage($users, "users", "success");
+			answer($users, "users", "success");
 		}
 		else
 		{
-			DisplayServerStatusMessage($users, "users", "failed");
+			answer($users, "users", "failed");
 		}
 	}
 
@@ -44,11 +43,11 @@ if(isset($_REQUEST["action"]))
 
 		if($groups)
 		{
-			DisplayServerStatusMessage($groups, "groups", "success");
+			answer($groups, "groups", "success");
 		}
 		else
 		{
-			DisplayServerStatusMessage($groups, "groups", "failed");
+			answer($groups, "groups", "failed");
 		}
 	}
 	/* create new  user */
@@ -71,13 +70,13 @@ if(isset($_REQUEST["action"]))
 		if($output)
 		{
 			// if there is output on edit -> something is bad -> and $output should contain the error message that is forwareded to the client
-			// DisplayServerStatusMessage($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
-			DisplayServerStatusMessage(null,"update","failed","failed",$output,"lib_users_and_groups.php: action newUser failed");
+			// answer($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
+			answer(null,"update","failed","failed",$output,"lib_users_and_groups.php: action newUser failed");
 		}
 		else
 		{
 			// if there is no output on edit -> everything is okay
-			DisplayServerStatusMessage($result,"update","success","success","successfully added a new user to the database.");
+			answer($result,"update","success","success","successfully added a new user to the database.");
 		}
 	}
 	/* update an existing user */
@@ -102,13 +101,13 @@ if(isset($_REQUEST["action"]))
 		if($output)
 		{
 			// if there is output on edit -> something is bad -> and $output should contain the error message that is forwareded to the client
-			// DisplayServerStatusMessage($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
-			DisplayServerStatusMessage(null,"update","failed","failed",$output,"lib_users_and_groups.php: useredit/update failed.");
+			// answer($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
+			answer(null,"update","failed","failed",$output,"lib_users_and_groups.php: useredit/update failed.");
 		}
 		else
 		{
 			// if there is no output on edit -> everything is okay
-			DisplayServerStatusMessage($result,"update","success","success","user updated successfully");
+			answer($result,"update","success","success","user updated successfully");
 		}
 	}
 
@@ -124,13 +123,13 @@ if(isset($_REQUEST["action"]))
 		if($output)
 		{
 			// if there is output on edit -> something is bad -> and $output should contain the error message that is forwareded to the client
-			// DisplayServerStatusMessage($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
-			DisplayServerStatusMessage(null,"update","failed","failed",$output,"lib_users_and_groups.php: action delete User failed");
+			// answer($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
+			answer(null,"update","failed","failed",$output,"lib_users_and_groups.php: action delete User failed");
 		}
 		else
 		{
 			// if there is no output on edit -> everything is okay
-			DisplayServerStatusMessage($result,"update","success","success","deleted User successfully");
+			answer($result,"update","success","success","deleted User successfully");
 		}
 	}
 }

@@ -1,66 +1,57 @@
 <?php
-/*
-======== purpose of this file:
-allow users to login / forward them to registration form
-
-======== methology:
-o no refresh of the page should be necessary to complete any command
--> all commands will be send to backend via jquery-ajax requests.
-
-====== TODO
-
-=== detect language of user
-o even before the user logs in, infdex.php should detect the browser's language
-and display the frontend_login.php in the correct language
-
-====== TestDocumentation
-
-==== commands
-
-=== login [implemented and tested]
-o after correct login/auth
--> you should get redireted to the page defined in mysql->jquery_server->passwd->home of the user
-
-o wrong username/password
--> display orange warning: "failed: login wrong username or password."
-*/
+/* TODO: */
+require_once 'header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="">
-<meta name="author" content="">
-<link rel="shortcut icon" href="images/opensource_icon.png">
-<!-- <link rel="apple-touch-icon" href="images/opensource_icon.png"/> -->
+		<!-- page-specific css -->
+		<style>
+			body {
+			  padding-top: 40px;
+			  padding-bottom: 40px;
+			  background-color: #eee;
+			}
+			
+			.form-signin {
+			  max-width: 330px;
+			  padding: 15px;
+			  margin: 0 auto;
+			}
+			.form-signin .form-signin-heading,
+			.form-signin .checkbox {
+			  margin-bottom: 10px;
+			}
+			.form-signin .checkbox {
+			  font-weight: normal;
+			}
+			.form-signin .form-control {
+			  position: relative;
+			  font-size: 16px;
+			  height: auto;
+			  padding: 10px;
+			  -webkit-box-sizing: border-box;
+			     -moz-box-sizing: border-box;
+			          box-sizing: border-box;
+			}
+			.form-signin .form-control:focus {
+			  z-index: 2;
+			}
+			.form-signin input[type="text"] {
+			  margin-bottom: -1px;
+			  border-bottom-left-radius: 0;
+			  border-bottom-right-radius: 0;
+			}
+			.form-signin input[type="password"] {
+			  margin-bottom: 10px;
+			  border-top-left-radius: 0;
+			  border-top-right-radius: 0;
+			}
+		</style>
 
-<title>login with your bootstrapped on</title>
-
-<!-- Bootstrap core CSS -->
-<link href="css/bootstrap_modified.css" rel="stylesheet">
-
-<!-- Custom styles for this template -->
-<link href="css/signin.css" rel="stylesheet">
-
-<!-- global jquery-server.com -->
-<link href="css/global.css" type="text/css" rel="stylesheet"/>
-
-<!-- Just for debugging purposes. Don't actually copy this line! -->
-<!--[if lt IE 9]><script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-<!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="js/respond.min.js"></script>
-    <![endif]-->
-</head>
-
-<body>
-	<div class="container">
-		<div class="logo"><img width="300px" src="images/projectlogo.png"></div> <!-- where the logo (as configured in conf/config.php will be shown -->
-		<form class="form-signin" action="http://localhost/jquery-server.com/login_backend.php" onsubmit="javascript: return false;">
+		<div class="logo">
+			<?php
+			echo '<img id="logo" src="'.config::get('platform_logo').'" style="width:200px;"/>';
+			?>
+		</div>
+		<form class="form-signin" action="login_backend.php" onsubmit="javascript: return false;">
 			<h2 class="form-signin-heading">Please sign in</h2>
 			<!-- credentials -->
 			<!-- username input -->
@@ -77,16 +68,10 @@ o wrong username/password
 			<!-- where errors are displayed (put it directly next to the interactive element, that can produce an error) -->
 			<div class="error_div"></div>
 		</form>
-	</div>
-	<!-- /container -->
-
-	<!-- Bootstrap core JavaScript
-    ================================================== -->
-	<!-- Placed at the end of the document so the pages load faster -->
-    <script src="lib/js/jquery.js"></script>
-    <script src="lib/js/bootstrap.min.js"></script>
+    
+    <!-- include page-specific js libraries -->
     <script src="lib/js/lib_webtoolkit.md5.js"></script>
-    <script src="lib/js/lib_general.js"></script>
+    <!-- page-specific js code -->
     <script>
     $(document).ready(function() {
     	/* handles the submit of the form javascript way (not calling an url) */
@@ -94,7 +79,7 @@ o wrong username/password
     	$('.form-signin').submit(function() {
     	    submitForm('.form-signin',	function(result)
 					    	    	    {
-					    					DisplayServerStatusMessage(result,$(".error_div")); // visualize the response
+					    					ServerStatusMessage(result,$(".error_div")); // visualize the response
 					
 					    					// after a successful login
 					    					if((result["action"] == "login") && (result["resultType"] == "success"))
@@ -118,5 +103,7 @@ o wrong username/password
     	);
     });
     </script>
-</body>
-</html>
+<?php
+/* TODO: */
+include 'footer.php';
+?>

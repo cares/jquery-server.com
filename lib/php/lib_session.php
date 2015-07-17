@@ -16,7 +16,7 @@ if($settings_datasource == "mysql")
 {
 	require_once('./lib/php/lib_mysqli_commands.php');
 
-	global $mysqli_object;
+	global config::get('mysqli_object');
 	if(!class_exists("mysqli"))
 	{
 		require_once('mysqli.php');

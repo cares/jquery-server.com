@@ -1,22 +1,4 @@
-<?php
-/* ================= security check */
-error_reporting(E_ALL); // turn the reporting of php errors on
-$allowed_users = "all users including guests"; // a list of userIDs that are allowed to access this page 
-$allowed_groups = "all groups including guests"; // a list of groups, that are allowed to access this page
-require_once('./lib/php/lib_security.php'); // will mysql-real-escape all input
-require_once("config/config.php"); // load project-config file
-/* ================= security check */
-/*
-======== purpose of this file:
-administer users
-
-======== methology:
-o no refresh of the page should be necessary to complete any command
--> all commands will be send to backend via jquery-ajax requests.
-====== TODO
-o layout too complicated
-... do not always show all buttons.
-
+<!-- ================= TODO
 o test adding users
 o test deleting users
 o change all php to javascript, php generated sources out
@@ -24,23 +6,7 @@ currently on: getting page useradd to work (form like login)
 o test profile picture upload :-D
 ... is broken. i don't know yet how to jquery->upload without page refresh. (it's a bigger problem so i won't fix it now)
 ... submit is wrong... because it submitts the whole form instead of triggering a upload
-
-====== TestDocumentation
-
-==== commands
-
-=== add a user [implemented but untested]
-o click on add
-oo fill out the form, hit enter (check if passwords match, mail is valid etc.)
-
-=== change a user [implemented but untested]
-o 
-
-=== delete a user [implemented and tested]
-o select a user, delete it
--> you should be asked for confirmation, after clicking confirm the user gets deleted
-*/
-?>
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,7 +20,7 @@ o select a user, delete it
 <title>ManagementUser</title>
 
 <!-- Bootstrap core CSS -->
-<link href="css/bootstrap_modified.css" rel="stylesheet">
+<link href="css/bootstrap.min.css" rel="stylesheet">
 
 <!-- Custom styles for this template -->
 <link href="css/offcanvas.css" rel="stylesheet">
@@ -67,10 +33,6 @@ o select a user, delete it
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
-
-<!-- page specific css -->
-<style>
-</style>
 </head>
 
 <body>
@@ -88,8 +50,8 @@ o select a user, delete it
 			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
 					<li><a href="#home">Home</a></li>
-					<li class="active"><a href="ManagementUser.php">Users</a></li>
-					<li ><a href="ManagementDevice.php">Devices</a></li>
+					<li class="active"><a href="manage.users.php">Users</a></li>
+					<li ><a href="manage.devices.php">Devices</a></li>
 					<li><a href="#about">About</a></li>
 					<li><a href="#contact">Contact</a></li>
 				</ul>
@@ -132,56 +94,51 @@ o select a user, delete it
 
 		<hr>
 
-		<div id="UserEditForm" class="hidden row row-offcanvas row-offcanvas-right">
-			<!-- user add/edit form -->
-			<h4>Edit/Add User:</h4>
-			<form id="form-userEdit" class="form-userEdit" action="lib/php/lib_users_and_groups.php" onsubmit="javascript: return false;">
-				<p>
-					<img id="profilepicture" class="profilepicture" src="" alt="profile Picture">
-				</p>
-				<input id="UserID" name="UserID" type="text" class="hidden form-control">
-				<input id="action" name="action" type="text" class="hidden form-control"> <!-- default-mode: create new user -->
-				<label>firstname:</label>
-				<input id="firstname" name="firstname" type="text" class="form-control">
-				<label>lastname:</label>
-				<input id="lastname" name="lastname" type="text" class="form-control">
-	
-				<!-- username -->
-				<label>UserName:</label>
-				<input id="username" name="username" type="text" class="form-control">
-				<!-- password -->
-				<label>Password:</label>
-				<!-- should not be submitted, because it has no name -->
-				<input id="password" type="password" placeholder="password" class="form-control" title="something wrong here" data-placement="bottom">
-				<!-- password check -->
-				<input id="password_check" type="password" placeholder="password Again" class="form-control" title="something wrong here" data-placement="bottom">
-				<input id="password_encrypted" name="password_encrypted" type="text" placeholder="generated encrypted password" class="form-control" type="submit">
-			</form>
-		</div>
+		<!-- user add/edit form -->
+		<h4>Edit/Add User:</h4>
+		<form id="form-userEdit" class="form-userEdit" action="lib/php/lib_users_and_groups.php" onsubmit="javascript: return false;">
+			<p>
+				<img id="profilepicture" class="profilepicture" src="" alt="profile Picture">
+			</p>
+			<input id="UserID" name="UserID" type="text" class="hidden form-control">
+			<input id="action" name="action" type="text" class="hidden form-control"> <!-- default-mode: create new user -->
+			<label>firstname:</label>
+			<input id="firstname" name="firstname" type="text" class="form-control">
+			<label>lastname:</label>
+			<input id="lastname" name="lastname" type="text" class="form-control">
+
+			<!-- username -->
+			<label>UserName:</label>
+			<input id="username" name="username" type="text" class="form-control">
+			<!-- password -->
+			<label>Password:</label>
+			<!-- should not be submitted, because it has no name -->
+			<input id="password" type="password" placeholder="password" class="form-control" title="something wrong here" data-placement="bottom">
+			<!-- password check -->
+			<input id="password_check" type="password" placeholder="password Again" class="form-control" title="something wrong here" data-placement="bottom">
+			<input id="password_encrypted" name="password_encrypted" type="text" placeholder="generated encrypted password" class="form-control" type="submit">
+		</form>
 
 		<!-- groups -->
-		<div id="GroupsForm" class="hidden row row-offcanvas row-offcanvas-right">
-			<label>belongs to these Groups:</label>
-			<p>tip on one of these buttons to make the user belong to this group
-				(blue) or remove user from group (grey).</p>
-			<div class="row groups"></div>
-	
-			<!-- controls -->
-			<div class="row">
-				<div class="col-6 col-sm-6 col-lg-4">
-					<button id="add" class="btn btn-lg btn-warning btn-block">add</button>
-				</div>
-				<div class="col-6 col-sm-6 col-lg-4">
-					<button id="save" class="btn btn-lg btn-warning btn-block">save</button>
-				</div>
-				<div class="col-6 col-sm-6 col-lg-4">
-					<button id="delete" class="btn btn-lg btn-danger btn-block">delete</button>
-				</div>
-				<!-- where errors are displayed (put it directly next to the interactive element, that can produce an error) -->
-				<div class="error_div col-6 col-sm-6 col-lg-4"></div>
-			</div>
-		</div>
+		<label>belongs to these Groups:</label>
+		<p>tip on one of these buttons to make the user belong to this group
+			(blue) or remove user from group (grey).</p>
+		<div class="row groups"></div>
 
+		<!-- controls -->
+		<div class="row">
+			<div class="col-6 col-sm-6 col-lg-4">
+				<button id="add" class="btn btn-lg btn-warning btn-block">add</button>
+			</div>
+			<div class="col-6 col-sm-6 col-lg-4">
+				<button id="save" class="btn btn-lg btn-warning btn-block">save</button>
+			</div>
+			<div class="col-6 col-sm-6 col-lg-4">
+				<button id="delete" class="btn btn-lg btn-danger btn-block">delete</button>
+			</div>
+			<!-- where errors are displayed (put it directly next to the interactive element, that can produce an error) -->
+			<div class="error_div col-6 col-sm-6 col-lg-4"></div>
+		</div>
 		<!-- confirm delete dialog -->
 		<div id="confirm_deletion" class="row" style="display: none;">
 			<div class="col-6 col-sm-6 col-lg-4">
@@ -222,9 +179,6 @@ o select a user, delete it
 
 			$(".edit").click(function()
 			{
-				$("#GroupsForm").show();
-				$("#UserEditForm").show();
-
 				scrollTo("#form-userEdit");
 
 				// what happens if the user clicks on edit button below profile picture
@@ -292,9 +246,6 @@ o select a user, delete it
     	// when hitting save trigger submit
 		$("#save").click(function() {
 			$('.form-userEdit').submit();
-			$("#UserEditForm").fadeOut(400);
-			$("#GroupsForm").fadeOut(400);
-		
 		});
 
     	// delete user
@@ -313,7 +264,7 @@ o select a user, delete it
 			var url = "lib/php/lib_users_and_groups.php?";
 			submitUrl(url,data,function(result)
 		    	    {
-						DisplayServerStatusMessage(result,$(".error_div")); // visualize the response
+						ServerStatusMessage(result,$(".error_div")); // visualize the response
 
 						$("#confirm_deletion").fadeOut(400); // hide the confirm dialog
 						$("#action").val(""); // reset action
@@ -400,7 +351,7 @@ o select a user, delete it
             
 		        submitForm(this,function(result)
 			    	    	    {
-			    					DisplayServerStatusMessage(result,$(".error_div")); // visualize the response
+			    					ServerStatusMessage(result,$(".error_div")); // visualize the response
 
 			    					if(result["resultType"] == "success")
 			    					{

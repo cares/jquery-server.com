@@ -175,8 +175,8 @@ function mergeObject($A,$InToObjectB)
 * */
 function arrayobject2sqlvalues($ArrayOrObject,$mode)
 {
-	global $settings_database_name;
-	global $settings_database_auth_table; global $settings_database_groups_table;
+	config::get('database')['name'];
+	global $config_database_auth_table; global $config_database_groups_table;
 	
 	$query = "";
 	$count = 0;

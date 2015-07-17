@@ -1,35 +1,12 @@
-<?php
-/* ================= security check */
-error_reporting(E_ALL); // turn the reporting of php errors on
-$allowed_users = "all users including guests"; // a list of userIDs that are allowed to access this page 
-$allowed_groups = "all groups including guests"; // a list of groups, that are allowed to access this page
-require_once('./lib/php/lib_security.php'); // will mysql-real-escape all input
-require_once("config/config.php"); // load project-config file
-/* ================= security check */
-
-/*
-======== purpose of this file:
-allow admin to administer all devices of all users
-allow users to administer their device
-
-======== methology:
-
-====== TODO
-
-====== TestDocumentation
-
-==== commands
-
-=== o test adding users
-=== o test deleting users
+<!-- ================= TODO
+o test adding users
+o test deleting users
 o change all php to javascript, php generated sources out
 currently on: getting page useradd to work (form like login)
 o test profile picture upload :-D
 ... is broken. i don't know yet how to jquery->upload without page refresh. (it's a bigger problem so i won't fix it now)
 ... submit is wrong... because it submitts the whole form instead of triggering a upload
-
-*/
-?>
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,8 +51,8 @@ o test profile picture upload :-D
 			<div class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
 					<li><a href="#home">Home</a></li>
-					<li><a href="ManagementUser.php">Users</a></li>
-					<li class="active"><a href="ManagementDevice.php">Devices</a></li>
+					<li><a href="manage.users.php">Users</a></li>
+					<li class="active"><a href="manage.devices.php">Devices</a></li>
 					<li><a href="#about">About</a></li>
 					<li><a href="#contact">Contact</a></li>
 				</ul>
@@ -288,7 +265,7 @@ o test profile picture upload :-D
 			var url = "lib/php/lib_users_and_groups.php?";
 			submitUrl(url,data,function(result)
 		    	    {
-						DisplayServerStatusMessage(result,$(".error_div")); // visualize the response
+						ServerStatusMessage(result,$(".error_div")); // visualize the response
 
 						$("#confirm_deletion").fadeOut(400); // hide the confirm dialog
 						$("#action").val(""); // reset action
@@ -375,7 +352,7 @@ o test profile picture upload :-D
             
 		        submitForm(this,function(result)
 			    	    	    {
-			    					DisplayServerStatusMessage(result,$(".error_div")); // visualize the response
+			    					ServerStatusMessage(result,$(".error_div")); // visualize the response
 
 			    					if(result["resultType"] == "success")
 			    					{
