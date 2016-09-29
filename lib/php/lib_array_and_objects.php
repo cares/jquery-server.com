@@ -129,7 +129,7 @@ function mergeArray($A,$InToArrayB)
 /* sometimes when querying the database, only a single result is returned but encapsulated in an array
  * for easier further processing it is necessary to extract it.
 */
-function getFirstElementOfArray($array)
+function GetFirstElementOfArray($array)
 {
 	$result = Array();
 	if(isset($array))
@@ -175,9 +175,6 @@ function mergeObject($A,$InToObjectB)
 * */
 function arrayobject2sqlvalues($ArrayOrObject,$mode)
 {
-	config::get('database')['name'];
-	global $config_database_auth_table; global $config_database_groups_table;
-	
 	$query = "";
 	$count = 0;
 	

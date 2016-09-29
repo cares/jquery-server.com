@@ -2,7 +2,7 @@
 o test adding users
 o test deleting users
 o change all php to javascript, php generated sources out
-currently on: getting page useradd to work (form like login)
+currently on: getting page UserAdd to work (form like login)
 o test profile picture upload :-D
 ... is broken. i don't know yet how to jquery->upload without page refresh. (it's a bigger problem so i won't fix it now)
 ... submit is wrong... because it submitts the whole form instead of triggering a upload
@@ -86,7 +86,7 @@ o test profile picture upload :-D
 				role="navigation">
 				<div class="list-group">
 					<a href="#listOfusers" class="list-group-item active">List of Users</a>
-					<a href="#form-userEdit" class="list-group-item">EditForm</a>
+					<a href="#form-UserEdit" class="list-group-item">EditForm</a>
 				</div>
 			</div>
 			<!--/span-->
@@ -97,7 +97,7 @@ o test profile picture upload :-D
 
 		<!-- user add/edit form -->
 		<h4>Edit User:</h4>
-		<form id="form-userEdit" class="form-userEdit" action="lib/php/lib_users_and_groups.php" onsubmit="javascript: return false;">
+		<form id="form-UserEdit" class="form-UserEdit" action="lib/php/lib_users_and_groups.php" onsubmit="javascript: return false;">
 			<p>
 				<img id="profilepicture" class="profilepicture" src="" alt="profile Picture">
 			</p>
@@ -180,7 +180,7 @@ o test profile picture upload :-D
 
 			$(".edit").click(function()
 			{
-				scrollTo("#form-userEdit");
+				scrollTo("#form-UserEdit");
 
 				// what happens if the user clicks on edit button below profile picture
 				var UserID = $(this).next();
@@ -246,7 +246,7 @@ o test profile picture upload :-D
 
     	// when hitting save trigger submit
 		$("#save").click(function() {
-			$('.form-userEdit').submit();
+			$('.form-UserEdit').submit();
 		});
 
     	// delete user
@@ -273,7 +273,7 @@ o test profile picture upload :-D
 						if(result["resultType"] == "success")
 						{
 							// after a successful deletion -> what now?
-							// $('.form-userEdit').clearForm();
+							// $('.form-UserEdit').clearForm();
 							// $("#profilepicture").attr("src","");
 							document.location.reload(true); // reload the page, will probably also clear and reset form but also update the user-list
 						}
@@ -292,7 +292,7 @@ o test profile picture upload :-D
 		$("#add").click(function() {
 			$("#firstname").focus(); // will bring focus
 			$("#firstname").addClass("focusedInput"); // will give it the boostraped focus style
-			$('.form-userEdit').clearForm();
+			$('.form-UserEdit').clearForm();
 			$("#profilepicture").attr("src","");
 			$('.group').removeClass("btn-primary"); // disable all group buttons
 			$("#UserID").val(""); // reset selected user id
@@ -301,7 +301,7 @@ o test profile picture upload :-D
 		});
 
     	// this is executed when user hits enter on input fields or touches down on the save button
-    	$('.form-userEdit').submit(function() {
+    	$('.form-UserEdit').submit(function() {
 	    	// validate form
 			var valid = true;
 

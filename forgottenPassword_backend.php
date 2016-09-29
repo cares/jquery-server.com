@@ -29,7 +29,7 @@ if(!empty($_REQUEST['mail']))
 		
 		// update password in database
 		// EDIT THE USER
-		$output = useredit($user);
+		$output = UserEdit($user);
 		
 		// check if any error
 		if(!$output)

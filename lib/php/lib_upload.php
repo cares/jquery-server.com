@@ -1,7 +1,7 @@
 <?php
 /* =============== about:
  * this should allow a simple file/picture upload, no ajax, no progress bar, just keep it simple style
- * variables needs to be set in the file.php that includes ./lib/php/lib_upload.php like this: (example frontend_useradd.php)
+ * variables needs to be set in the file.php that includes ./lib/php/lib_upload.php like this: (example frontend_UserAdd.php)
 
  * =============== usage:
 	<?php

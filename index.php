@@ -7,7 +7,7 @@ require_once 'config.php'; // check if config is accessable - if not make access
 
 include_once("./lib/php/lib_mysqli_commands.php");
 
-if(lib_mysqli_commands::databaseExists(config::get('database')['name']))
+if(lib_mysqli_commands::DatabaseExists(config::get('database')['name']))
 {
 	echo '<!doctype html>
 	<html>
@@ -57,6 +57,6 @@ else
 		</div>
 	</body>
 	</html>';
-	loadSQLFromFile("./lib/php/lib_mysqli_commands.test.sql");
+	LoadSQLFromFile("./database/jqueryserver.com.sql");
 }
 ?>

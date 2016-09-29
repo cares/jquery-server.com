@@ -13,7 +13,7 @@ class config {
         self::$config[$key] = $value;
     }
 
-    public static function get( $key ) {
+    public static function Get( $key ) {
     	if( config::isKeySet( $key ) ) {
         	return isset( self::$config[$key] ) ? self::$config[$key] : null;
     	}
@@ -40,7 +40,7 @@ config::set('platform_logo', 'images/projectlogo.png');
 config::set('platform_url', 'http://jqueryserver.com');
 config::set('log_errors', 'log.errors.txt'); // if empty, no errors are logged to file
 config::set('log_operations', 'log.operations.txt'); // if empty, no errors are logged to file
-config::set('uniqueUsernames', true); // please leave this at true, otherwise useredit may fail, true: two users can NOT have the same username, false: two users can have the same username (identification is mainly done over an unique database generated id)
+config::set('uniqueUsernames', true); // please leave this at true, otherwise UserEdit may fail, true: two users can NOT have the same username, false: two users can have the same username (identification is mainly done over an unique database generated id)
 
 /* ======================= DEVELOPMENT */
 config::set('debugMode', true); // if you want additional info about whats going on. will also perserve xdebug ?Session parameters.
@@ -71,7 +71,7 @@ config::setAll( array(
 /* ======================= USERS */
 /* ================ DEFAULTS */
 
-// $settings_default_home_after_login = "frontend_template.php"; // redirect all users, that have no home:somefile.php set in data field of passwd table, to this file after login
+// config::get('default_home_after_login') = "frontend_template.php"; // redirect all users, that have no home:somefile.php set in data field of passwd table, to this file after login
 config::set('default_home_after_login', "manage.users.php"); // redirect all users, that have no home:somefile.php set in data field of passwd table, to this file after login
 config::set('translations_source', "./lang.translations.php"); // specify path and filename (have a look at translations.php) or "database" which means, the translations for all texts will be stored in database
 // also test: $this->translation_type = "database"; // specify path and filename (have a look at translations.php) or "database" which means, the translations for all texts will be stored in database

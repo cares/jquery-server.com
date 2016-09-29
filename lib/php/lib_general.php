@@ -2,6 +2,35 @@
 require_once('lib_array_and_objects.php');
 require_once('lib_convert.php');
 
+/* search and include the missing lib - test if relative or absolute paths are necessary to include the lib */
+function include_missing_lib($lib_name)
+{
+	$current_working_directory = getcwd();
+	
+	if(file_exists ($lib_name))
+	{
+		require_once ($lib_name);
+	}
+	else
+	{
+		if (file_exists ('../../'.$lib_name))
+		{
+			require_once ('../../'.$lib_name);
+		}
+		else
+		{
+			if (file_exists ('./lib/php/'.$lib_name))
+			{
+				require_once ('./lib/php/'.$lib_name);
+			}
+			else
+			{
+				trigger_error ( basename ( __FILE__, '.php' ) . "-> could not include library ".$lib_name.", it should be on top of every file.php", E_USER_ERROR );
+			}
+		}
+	} // include lib_general.php
+}
+
 /* just very general functions, is included via config.php
  * so that it is available to all files */
 
@@ -10,7 +39,7 @@ require_once('lib_convert.php');
  * name="checkbox_group_users"
  * ... one wants to extract all this group info into one array/object
  */
-function getREQUESTSstarting($with)
+function GetREQUESTSstarting($with)
 {
 	$result = array();
 	$count = strlen($with);

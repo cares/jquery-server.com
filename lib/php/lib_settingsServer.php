@@ -1,5 +1,10 @@
 <?php
 /* provides server settings for jquery-js-clients  */
+// include lib_general.php, should be on top of every file
+if(file_exists('lib_general.php')) { require_once('lib_general.php'); } else { if(file_exists('./lib/php/lib_general.php')) { require_once('./lib/php/lib_general.php'); } else { trigger_error(basename(__FILE__, '.php')."-> could not include library lib_general.php, it should be on top of every file.php", E_USER_ERROR); }}
+
+include_missing_lib("config.php");
+
 $settings = Array();
 
 if($_REQUEST["get"] == "settings")

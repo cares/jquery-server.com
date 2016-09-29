@@ -45,7 +45,7 @@ class mysqli_interface extends config {
 		self::$mysqli_interface[$key] = $value;
 	}
 	
-	public static function get( $key ) {
+	public static function Get( $key ) {
 		if( mysqli_interface::isKeySet( $key ) ) {
 			return isset( self::$mysqli_interface[$key] ) ? self::$mysqli_interface[$key] : null;
 		}
@@ -83,81 +83,73 @@ class mysqli_interface extends config {
 	*/
 	public static function query($query,$return_data = true)
 	{
-		mysqli_interface::set('output',array());
-		mysqli_interface::set('worked',false);
-		mysqli_interface::set('id_last','');
+		$records = array();							// data extracted from mysql-result-pointer "the result", yes it is over-complicated and one tries to simplify php's mysqli way of accessing data, but it's still complicated.
+		mysqli_interface::set('result',array());	// mysql-result-pointer, pointing to result of last query.
+		mysqli_interface::set('output','');			// contains message to client e.g. the last detailed success/error message.
+		mysqli_interface::set('worked',false);		// status, if the last query was successfull (true) or failed with an sql-error (false).
+		mysqli_interface::set('id_last','');		// if there was an insert, return the auto-generated id of the record inserted.
+
 		$mysqli_link = mysqli_interface::get('mysqli_link');
-		mysqli_interface::get('mysqli_object');
-		config::get('database')['name']['server'];
-		config::get('database')['name']['user'];
-		config::get('database')['name']['pass'];
-		config::get('database')['name']['datasource'];
+		// mysqli_interface::get('mysqli_object');
 
 		$detectCreateDatabase = substr($query, 0, 15);
 		if("CREATE DATABASE" == $detectCreateDatabase)
 		{
-			$result = true;
+			mysqli_interface::set('result',true);
 		}
 		else
 		{
-			$result = $mysqli_link->select_db(config::get('database')['name']);
+			mysqli_interface::set('result',$mysqli_link->select_db(config::get('database')['name']));
 		}
 
-		if(!$result)
+		if(!mysqli_interface::get('result'))
 		{
 			// could not select database, something went wrong
-			$worked = false;
 			mysqli_interface::set('worked', false); // status, if the last query was successfull (true) or failed (false)
 
 			// check if database exists
 			$query = "SHOW DATABASES;";
-			$result = mysqli_query($query);
-			// $id_last = mysqli_insert_id($mysqli_link);
+			mysqli_interface::set('result',mysqli_query($query));
 
-			$output = "type:error,id:select_db failed,details:"." Selecting database failed: ".mysqli_connect_error();
-			trigger_error($output);
+			mysqli_interface::set('output',"type:error,id:select_db failed,details:"." Selecting database failed: ".mysqli_connect_error());
+			trigger_error(mysqli_interface::get('output'));
 		}
 		else
 		{
 			// 2. execute query, check for query errors
-			$result = mysqli_query($mysqli_link,$query);
-			mysqli_interface::set('result',$result);
-			$id_last = mysqli_insert_id($mysqli_link);
-			mysqli_interface::set('id_last',$id_last);
+			mysqli_interface::set('result',mysqli_query($mysqli_link,$query));
+			mysqli_interface::set('id_last',mysqli_insert_id($mysqli_link));
 
-			if(!$result)
+			if(!mysqli_interface::get('result'))
 			{
 				$error = $query." returns error: ".mysqli_errno($mysqli_link). ": ".mysqli_error($mysqli_link);
 				$error = str_replace(",", " ", $error);
 				$error = str_replace(":", " ", $error);
-				$settings_datasource = str_replace(",", " ", $settings_datasource);
-				$settings_datasource = str_replace(":", " ", $settings_datasource);
+				
+				// just for correct decoding of the message on client side, remove all possible delimiters from 'datasource' (mysql)
+				$temp = config::get('database')['datasource'];
+				$temp = str_replace(",", " ", $temp);
+				$temp = str_replace(":", " ", $temp);
 
-				$output = 'type:error,id:database error,details:'.$error.',datasource:'.$settings_datasource;
-				mysqli_interface::set('output',$output);
-				trigger_error($output);
+				mysqli_interface::set('output','type:error,id:database error,details:'.$error.',datasource:'.$temp);
+				trigger_error(mysqli_interface::get('output'));
 			}
 
 			if($return_data)
 			{
-				$worked = true;
-				if(!is_bool($result)) // query(UPDATE) = returns true/false
+				mysqli_interface::set('worked',true);
+				
+				if(!is_bool(mysqli_interface::get('result'))) // query(UPDATE) = returns no data just true/false (status if sql-command worked or not)
 				{
-					while ($obj = $result->fetch_object()) {
-						$output[] = $obj;
+					while ($record = mysqli_interface::get('result')->fetch_object()) {
+						$records[] = $record;
 					}
-					mysqli_free_result($result);
+					mysqli_free_result(mysqli_interface::get('result'));
 				}
 			}
 		}
 
-		// save
-		
-		mysqli_interface::set('output',$output); // contains message to client e.g. the last success/error message
-		mysqli_interface::set('worked', $worked); // status, if the last query was successfull (true) or failed (false)
-		mysqli_interface::set('result', $result); // result / data returned of last query
-		
-		return $output; // return
+		return $records; // return mysql data records
 	}
 
 	/* filter evil characters that could make mysql stumble or return a file that contains the whole database
@@ -171,6 +163,7 @@ class mysqli_interface extends config {
 	* */
 	function escape($input)
 	{
+		$mysqli_link = mysqli_interface::get('mysqli_link');
 		return mysqli_escape_string($mysqli_link,$input);
 	}
 }
@@ -190,9 +183,9 @@ mysqli_interface::set('errors', '');
 /* init mysql object */
 $config_database = config::get('database');
 
-$mysqli_link = mysqli_connect($config_database["server"], $config_database["user"], $config_database["pass"], $config_database['name']);
+$mysqli_link = mysqli_connect(config::get('database')['server'], config::get('database')['user'], config::get('database')['pass'], config::get('database')['datasource']);
 mysqli_interface::set('mysqli_link', $mysqli_link); // save for later reuse
-$mysqli_link->set_charset($config_database["charset"]);
+$mysqli_link->set_charset(config::get('database')['charset']);
 
 if (!$mysqli_link)
 {

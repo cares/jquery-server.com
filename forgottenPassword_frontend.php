@@ -54,7 +54,7 @@ require_once('./lib/php/lib_security.php'); // will mysql-real-escape all input
 		</div> 
 		<div data-role="footer">
 			<!-- if a user is not registered yet, they can click on this button -->
-			<a href="frontend_useradd.php" rel="external">register</a>
+			<a href="frontend_UserAdd.php" rel="external">register</a>
 		</div> 
 	</div>
 </body>
