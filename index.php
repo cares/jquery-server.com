@@ -7,7 +7,7 @@ require_once 'config.php'; // check if config is accessable - if not make access
 
 include_once("./lib/php/lib_mysqli_commands.php");
 
-if(lib_mysqli_commands::DatabaseExists(config::get('database')['name']))
+if(lib_mysqli_commands::DatabaseExists(config::get("db_name")))
 {
 	echo '<!doctype html>
 	<html>
@@ -44,7 +44,7 @@ else
 			<div id="zentriert" class="gradientV">
 				<fieldset>
 					<hr>
-					<h1 color="red">database '.config::get('database')['name'].' does not exist, creating it now... </h1>
+					<h1 color="red">database '.config::get("db_name").' does not exist, creating it now... </h1>
 					<hr>
 					<p>
 						You will be redirected to the <a href="login_frontend.php" rel="external">login page</a> in a few seconds... 
@@ -57,6 +57,6 @@ else
 		</div>
 	</body>
 	</html>';
-	LoadSQLFromFile("./database/jqueryserver.com.sql");
+	ImportSQLFromFile("./database/jqueryserver.com.sql");
 }
 ?>

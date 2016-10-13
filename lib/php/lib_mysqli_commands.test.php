@@ -7,10 +7,10 @@ $current_working_dir = getcwd();
 include_once("./lib/php/lib_mysqli_commands.php");
 
 // init database
-$mysqli_interface_instance = new mysqli_interface(); # create instance from class
-config::set('mysqli_object',$mysqli_interface_instance);
+// $mysqli_interface_instance = new mysqli_interface(); # create instance from class
+// config::set('mysqli_object',$mysqli_interface_instance);
 
-$lib_mysqli_commands_instance = new lib_mysqli_commands(); # create instance from class
+$lib_mysqli_commands_instance = new lib_mysqli_commands("test"); # create instance from class and connect to database "test", overwrite default-settings from config.php
 
 echo "<hr><h1 color='red'>test database user management commands</h1><br>";
 
@@ -25,8 +25,12 @@ else
 {
 	// no
 	comment("database 'test' does not exist - create it now");
-	$lib_mysqli_commands_instance->LoadSQLFromFile("./lib/php/lib.mysqli.commands.test.sql");
 }
+
+/* ================ create database ================ */
+
+// one just drops and recreates the test database via this sql backup 
+$lib_mysqli_commands_instance->ImportSQLFromFile("./lib/php/lib.mysqli.commands.test.sql");
 success();
 
 $exists = $lib_mysqli_commands_instance->TableExists("test","passwd");
@@ -42,25 +46,7 @@ comment("get definition of user from database");
 $user = $lib_mysqli_commands_instance->NewUser();
 success();
 
-// UserDel with id
-$user->id = 0;
-comment("delete User by id (default)");
-success($lib_mysqli_commands_instance->UserDel($user));
-
-// UserDel with username
-comment("delete user by username (all users with this username if reuse allowed)");
-$user->username = "user";
-success($lib_mysqli_commands_instance->UserDel($user,"username"));
-$user->username = "superuser";
-success($lib_mysqli_commands_instance->UserDel($user,"username"));
-
-// GroupDel - delete a group ALSO UPDATE USER RECORDS!
-$group = $lib_mysqli_commands_instance->NewGroup();
-comment("GroupDel - delete a group ALSO UPDATE USER RECORDS!");
-$group->groupname = "user";
-success($lib_mysqli_commands_instance->GroupDel($group,"groupname"));
-$group->groupname = "changedTest";
-success($lib_mysqli_commands_instance->GroupDel($group,"groupname"));
+/* ================ create data: users ================ */
 
 // UserAdd
 comment("add user to database");
@@ -70,6 +56,8 @@ $user->firstname = "firstname";
 $user->lastname = "lastname";
 $users = $lib_mysqli_commands_instance->UserAdd($user); // returns the user-object from database, containing a new, database generated id, that is important for editing/deleting the user later
 success();
+
+/* ================ read data: users ================ */
 
 // get user by id/Mail/Username
 comment("get user by ID");
@@ -85,7 +73,7 @@ success();
 
 // getUserByUsername
 comment("get User by Username");
-$user = $lib_mysqli_commands_instance->users($user,"username");
+$user = $lib_mysqli_commands_instance->users($user,"username"); // will return an array with only one entry if user with this "username" found
 success();
 
 // getUserByMail
@@ -114,23 +102,39 @@ comment("get all users with custom filter");
 $users = $lib_mysqli_commands_instance->users(null,"id","WHERE `mail` = 'mail@mail.de'");
 success();
 
+
+/* ================ modify change data: groups ================ */
 // UserEdit
 comment("edit User (if it exists)");
 $user->mail = "new@mail.de";
 $user->username = "superuser";
 success($lib_mysqli_commands_instance->UserEdit($user));
 
+/* ================ delete data: users ================ */
+
+// UserDel with id
+$user->id = 0;
+comment("delete User by id (default)");
+success($lib_mysqli_commands_instance->UserDel($user)); // if the user does not exist, output error or not?
+
+// UserDel with username
+comment("delete user by username (all users with this username if reuse allowed)");
+$user->username = "user";
+success($lib_mysqli_commands_instance->UserDel($user,"username"));
+$user->username = "superuser";
+success($lib_mysqli_commands_instance->UserDel($user,"username"));
+
 // UserExist
 comment("UserExist");
 success($lib_mysqli_commands_instance->UserExist($user));
 
+
+
+
+
 echo "<hr><h1 color='red'>test database Group management commands</h1><br>";
 
-// GroupDel - delete a group ALSO UPDATE USER RECORDS!
-comment("GroupDel - delete a group (can not be deleted if users are still in a group)");
-$group = $lib_mysqli_commands_instance->NewGroup();
-$group->groupname = "test";
-success($lib_mysqli_commands_instance->GroupDel($group,"groupname"));
+/* ================ create data: groups ================ */
 
 // GroupAdd
 /* the database-concept behind groups is like this:
@@ -141,6 +145,7 @@ comment("GroupAdd");
 $group = $lib_mysqli_commands_instance->GroupAdd($group); // returns the group-object from database, containing a new, database generated id, that is important for editing/deleting the group later
 success();
 
+/* ================ read data: groups ================ */
 // GroupExist
 comment("GroupExist - test if a group exists by id");
 if($lib_mysqli_commands_instance->GroupExist($group))
@@ -151,14 +156,7 @@ else
 {
 	echo "no group ".$group->groupname." does not exists.";
 }
-
 success();
-
-// groupchange, also update the name in all user records!!!
-comment("GroupEdit");
-$group->groupname = "changedTest";
-$group->mail = "groupA@mail.com";
-success($lib_mysqli_commands_instance->GroupEdit($group));
 
 // get group by id
 comment("get group by id");
@@ -209,6 +207,14 @@ comment("get all groups with this groupname");
 $groups = $lib_mysqli_commands_instance->groups(null,"id","WHERE `groupname` = '".$groupname."'");
 success();
 
+/* ================ modify change data: groups ================ */
+
+// groupchange, also update the name in all user records!!!
+comment("GroupEdit");
+$group->groupname = "changedTest";
+$group->mail = "groupA@mail.com";
+success($lib_mysqli_commands_instance->GroupEdit($group));
+
 // GroupAddUser - add user to a group
 comment("GroupAddUser - add user to a group");
 success($lib_mysqli_commands_instance->GroupAddUser($user,$group));
@@ -216,6 +222,24 @@ success($lib_mysqli_commands_instance->GroupAddUser($user,$group));
 // groupremuser - remove user from group
 comment("groupremuser - remove user from group");
 success($lib_mysqli_commands_instance->GroupDelUser($user,$group));
+
+/* ================ delete data: groups ================ */
+// GroupDel - delete a group ALSO UPDATE USER RECORDS!
+comment("GroupDel - delete a group (can not be deleted if users are still in a group)");
+$group = $lib_mysqli_commands_instance->NewGroup();
+$group->groupname = "test";
+success($lib_mysqli_commands_instance->GroupDel($group,"groupname"));
+
+
+
+
+
+
+
+
+
+
+/* ================ create data: records ================ */
 
 // recordget
 comment("get definition of arbitrary record from database");
@@ -235,6 +259,8 @@ comment("RecordEdit: change record");
 $NewRecord->key2 = "newvalue2";
 $NewRecord->key3 = "newvalue3";
 success($lib_mysqli_commands_instance->RecordEdit($NewRecord));
+
+/* ================ read data: records ================ */
 
 // records by id/Mail/Username
 comment("get record by ID");
@@ -260,6 +286,10 @@ success();
 comment("get all records with custom filter");
 $records = $lib_mysqli_commands_instance->records(null,"id","WHERE `key1` = 'value1'");
 success();
+
+/* ================ modify change data: records ================ */
+
+/* ================ delete data: records ================ */
 
 // RecordDel
 comment("RecordDel: del record");

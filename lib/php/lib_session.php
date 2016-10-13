@@ -11,7 +11,7 @@
 
 // 0. init database
 require_once("config/config.php");
-if(config::get('database')['datasource'] == "mysql")
+if(config::get("db_datasource") == "mysql")
 {
 	require_once('./lib/php/lib_mysqli_commands.php');
 

@@ -22,8 +22,11 @@ function AddToArrayIfNotExist($array1,$array2)
 
 /* check if an object or array has an an property, and if that property has an value
  * 
- * if $displayErrors = true
- * you will get error messages in your html-output
+ * input:
+ * $objectOrArray	= the Object or Array to check on
+ * $property 		= check $objectOrArray if this $property exists
+ * $caller			= this is just relevant for the a more detailed error message 
+ * $displayErrors	= if true, you will get error messages in your html-output
  * */
 function haspropertyandvalue($objectOrArray,$property,$caller,$displayErrors = false)
 {

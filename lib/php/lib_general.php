@@ -98,7 +98,7 @@ function answer($result = null,$action = "",$resultType = "",$resultValue = "",$
 /* this takes timestampt, md5-hashes it then cuts it down to 8 characters */
 function salt()
 {
-	$salt = substr(md5(time()), 8); // date("F")
+	$salt = md5(uniqid(rand()*time(), true)); // for security reasons, one tries to be as random as possible here
 	return $salt;
 }
 
@@ -157,32 +157,33 @@ function logError($error)
 	file_put_contents($settings_errorLog, $error."\n", FILE_APPEND);
 }
 
-/* outputs a warning and if $settings_log_errors == true, outputs to error.log */
+/* outputs a warning and if config::get('log_errors') == true, outputs to error.log */
 function error($message)
 {
 	trigger_error($message);
-
-	global $settings_log_errors;
-	global $worked;
-	$worked = false;
-	if(!empty($settings_log_errors)){
-		log2file($settings_log_errors,$message);
+	$log_errors = config::get('log_errors');
+	if(!empty($log_errors))
+	{
+		log2file(config::get('log_errors'),$message);
 	}
 	
 	return false;
 }
 
-/* outputs a warning and if $settings_log_errors == true, outputs to error.log */
+/* outputs a warning and if config::get('log_errors') == true, outputs to error.log */
 function operation($operation)
 {
-	global $settings_log_operations;
-	if(!empty($settings_log_operations)){
-		log2file($settings_log_operations,$operation);
+	$log_operations = config::get('log_operations');
+	if(!empty($log_operations))
+	{
+		log2file(config::get('log_operations'),$operation);
 	}
 }
 
 /* write the error to a log file */
 function log2file($file,$this)
 {
-	file_put_contents($file, time().": ".$this."\n", FILE_APPEND);
+	$line = time().": ".$this."\n";
+	$cwd = getcwd();
+	file_put_contents($file, $line, FILE_APPEND);
 }
