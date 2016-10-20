@@ -42,19 +42,19 @@ if($exists)
 }
 success();
 
+/* ================ create data: users ================ */
+
 comment("get definition of user from database");
 $user = $lib_mysqli_commands_instance->NewUser();
 success();
-
-/* ================ create data: users ================ */
-
 // UserAdd
 comment("add user to database");
 $user->username = "user";
 $user->mail = "mail@mail.de";
 $user->firstname = "firstname";
 $user->lastname = "lastname";
-$users = $lib_mysqli_commands_instance->UserAdd($user); // returns the user-object from database, containing a new, database generated id, that is important for editing/deleting the user later
+$_SESSION['session'] = $user->session = salt(); // set session on client side, this is a random id that identifies the access rights of the client
+$user = $lib_mysqli_commands_instance->UserAdd($user); // returns the user-object from database, containing a new, database generated id, that is important for editing/deleting the user later
 success();
 
 /* ================ read data: users ================ */
@@ -73,33 +73,34 @@ success();
 
 // getUserByUsername
 comment("get User by Username");
-$user = $lib_mysqli_commands_instance->users($user,"username"); // will return an array with only one entry if user with this "username" found
+$users_array = $lib_mysqli_commands_instance->users($user,"username"); // will return an array with only one entry if user with this "username" found
+$user = getFirstElementOfArray($users_array);
 success();
 
 // getUserByMail
 comment("get User by mail");
-$users = $lib_mysqli_commands_instance->users(null,"mail","mail@mail.de");
+$users_array = $lib_mysqli_commands_instance->users(null,"mail","mail@mail.de");
 success();
 
 // get all users in this group
 comment("get all users in this group");
-$users = $lib_mysqli_commands_instance->users(null,"groups","username");
+$users_array = $lib_mysqli_commands_instance->GetUsersOfGroup("user"); // username is the groupname in this case
 success();
 
 // the session variable exists, let's check it's valid:
 comment("GetUserBySession - important to check if user is logged in or not.");
-$_SESSION['session'] = "5217840915ed98901b610f61132a6c56"; // set some session
-$user = $lib_mysqli_commands_instance->GetUserBySession($_SESSION['session']);
+$users_array = $lib_mysqli_commands_instance->GetUserBySession($_SESSION['session']);
+$user = getFirstElementOfArray($users_array);
 success();
 
 // users
 comment("get a list of all users");
-$users = $lib_mysqli_commands_instance->users();
+$users_array = $lib_mysqli_commands_instance->users();
 success();
 
 // get all users with custom filter
 comment("get all users with custom filter");
-$users = $lib_mysqli_commands_instance->users(null,"id","WHERE `mail` = 'mail@mail.de'");
+$users_array = $lib_mysqli_commands_instance->users(null,"id","WHERE `mail` = 'mail@mail.de'");
 success();
 
 
@@ -107,7 +108,7 @@ success();
 // UserEdit
 comment("edit User (if it exists)");
 $user->mail = "new@mail.de";
-$user->username = "superuser";
+$user->username = "superuser"; // changing of usernames, does not anonymize the user to the server, server identifies with UserID.
 success($lib_mysqli_commands_instance->UserEdit($user));
 
 /* ================ delete data: users ================ */
@@ -125,12 +126,8 @@ $user->username = "superuser";
 success($lib_mysqli_commands_instance->UserDel($user,"username"));
 
 // UserExist
-comment("UserExist");
+comment("UserExist -> this is supposed to <span style=\"color: red;\">fail</span>, because user was deleted.");
 success($lib_mysqli_commands_instance->UserExist($user));
-
-
-
-
 
 echo "<hr><h1 color='red'>test database Group management commands</h1><br>";
 
@@ -142,6 +139,8 @@ echo "<hr><h1 color='red'>test database Group management commands</h1><br>";
  * 2. the table groups contains all available groups, you can add your own column-properties to the table, enriching the amounts of properties a group can have.
  */
 comment("GroupAdd");
+$group = $lib_mysqli_commands_instance->NewGroup();
+$group->groupname = "test";
 $group = $lib_mysqli_commands_instance->GroupAdd($group); // returns the group-object from database, containing a new, database generated id, that is important for editing/deleting the group later
 success();
 
@@ -150,61 +149,70 @@ success();
 comment("GroupExist - test if a group exists by id");
 if($lib_mysqli_commands_instance->GroupExist($group))
 {
-	echo "yes group ".$group->groupname." exists.";
+	echo "groupname: ".$group->groupname." exists.";
 }
 else
 {
-	echo "no group ".$group->groupname." does not exists.";
+	echo "groupname: ".$group->groupname." does not exists.";
 }
 success();
 
 // get group by id
 comment("get group by id");
-$groups = $lib_mysqli_commands_instance->groups($group,"id");
+$groups_array = $lib_mysqli_commands_instance->groups($group,"id");
 success();
 
 // get group by groupname
 comment("get group by groupname");
 $group->groupname = "changedTest";
-$groups = $lib_mysqli_commands_instance->groups($group,"groupname");
+$groups_array = $lib_mysqli_commands_instance->groups($group,"groupname");
 success();
 
 // get group by groupname
 comment("get group by groupname");
-$groups = $lib_mysqli_commands_instance->groups($group,"mail");
+$groups_array = $lib_mysqli_commands_instance->groups($group,"mail");
 success();
 
 // get all available groups
 comment("get all available groups");
-$groups = $lib_mysqli_commands_instance->groups();
+$groups_array = $lib_mysqli_commands_instance->groups();
 success();
 
 // get all groups that the user belongs to
 comment("get all groups that the user belongs to");
 comment("get groups of user as object");
-$groups = $lib_mysqli_commands_instance->GetGroupsOfUser($user);
-success();
 
-comment("get groups of user as an array of strings");
-$groups = $lib_mysqli_commands_instance->GetGroupsOfUser($user,"strings");
+// add the user first
+$user = $lib_mysqli_commands_instance->NewUser();
+comment("add user to database");
+$user->username = "user";
+$user->mail = "mail@mail.de";
+$user->firstname = "firstname";
+$user->lastname = "lastname";
+$user->groups = "system,user,this,that,others";
+$_SESSION['session'] = $user->session = salt(); // set session on client side, this is a random id that identifies the access rights of the client
+$user = $lib_mysqli_commands_instance->UserAdd($user); // returns the user-object from database, containing a new, database generated id, that is important for editing/deleting the user later
+
+comment("get groups of a user");
 // one big , separated string
-$groups = array2string($groups,null,",");
+$groups_string = $user->groups;
+$groups_array = $lib_mysqli_commands_instance->GetGroupsOfUser($user);
 success();
 
 // get system groups
 comment("get system groups");
-$groups = $lib_mysqli_commands_instance->groups(null,"id","WHERE `system` = 1");
+$groups_array = $lib_mysqli_commands_instance->groups(null,"id","WHERE `system` = 1");
 success();
 
 // get groups with custom filter
 comment("get groups with custom filter");
-$groups = $lib_mysqli_commands_instance->groups(null,"id","WHERE `mail` = 'groupA@mail.com'");
+$groups_array = $lib_mysqli_commands_instance->groups(null,"id","WHERE `mail` = 'groupA@mail.com'");
 success();
 
 // get all groups with this groupname
 $groupname = "user";
 comment("get all groups with this groupname");
-$groups = $lib_mysqli_commands_instance->groups(null,"id","WHERE `groupname` = '".$groupname."'");
+$groups_array = $lib_mysqli_commands_instance->groups(null,"id","WHERE `groupname` = '".$groupname."'");
 success();
 
 /* ================ modify change data: groups ================ */
@@ -242,7 +250,7 @@ success($lib_mysqli_commands_instance->GroupDel($group,"groupname"));
 /* ================ create data: records ================ */
 
 // recordget
-comment("get definition of arbitrary record from database");
+comment("get definition of table \"datarecord\" from database - to use them as a blueprint to create/add new records");
 $NewRecord = $lib_mysqli_commands_instance->newRecord("datarecord");
 
 // RecordAdd
@@ -251,40 +259,40 @@ $NewRecord->id = "auto";
 $NewRecord->key1 = "value1";
 $NewRecord->key2 = "value2";
 $NewRecord->key3 = "value3";
-$NewRecord = $lib_mysqli_commands_instance->RecordAdd($NewRecord); // returns the record-object from database, containing a new, database generated id, that is important for editing/deleting the record later
+$lib_mysqli_commands_instance->RecordAdd("datarecord",$NewRecord); // returns the record-object from database, containing a new, database generated id, that is important for editing/deleting the record later
 success();
 
 // recordchange
 comment("RecordEdit: change record");
 $NewRecord->key2 = "newvalue2";
 $NewRecord->key3 = "newvalue3";
-success($lib_mysqli_commands_instance->RecordEdit($NewRecord));
+success($lib_mysqli_commands_instance->RecordEdit("datarecord",$NewRecord));
 
 /* ================ read data: records ================ */
 
 // records by id/Mail/Username
 comment("get record by ID");
-$records = $lib_mysqli_commands_instance->records($NewRecord);
+$records = $lib_mysqli_commands_instance->records("datarecord",$NewRecord);
 success();
 
 // getUserByUsername
 comment("get User by key1");
-$records = $lib_mysqli_commands_instance->records($NewRecord,"key1");
+$records = $lib_mysqli_commands_instance->records("datarecord",$NewRecord,"key1");
 success();
 
 // getUserByMail
 comment("get User by key2");
-$records = $lib_mysqli_commands_instance->records($NewRecord,"key2");
+$records = $lib_mysqli_commands_instance->records("datarecord",$NewRecord,"key2");
 success();
 
 // records
 comment("get a list of all records");
-$records = $lib_mysqli_commands_instance->records();
+$records = $lib_mysqli_commands_instance->records("datarecord");
 success();
 
 // get all records with custom filter
 comment("get all records with custom filter");
-$records = $lib_mysqli_commands_instance->records(null,"id","WHERE `key1` = 'value1'");
+$records = $lib_mysqli_commands_instance->records("datarecord", null,"id","WHERE `key1` = 'value1'");
 success();
 
 /* ================ modify change data: records ================ */
@@ -293,7 +301,7 @@ success();
 
 // RecordDel
 comment("RecordDel: del record");
-success($lib_mysqli_commands_instance->RecordDel($NewRecord));
+success($lib_mysqli_commands_instance->RecordDel("datarecord",$NewRecord));
 
 // this functionalities need to be implemented with the very general functions above:
 // getDevices
@@ -322,9 +330,14 @@ function comment($input)
 	echo "<h3>".strval($input)."____________________________________________________________</h3><br>";
 }
 // colorful output about the outcomes of the functions
-function success()
+function success($worked = null)
 {
-	if(mysqli_interface::get('worked'))
+	if(is_null($worked))
+	{
+		$worked = mysqli_interface::get('worked');
+	}
+
+	if($worked)
 	{
 		echo "<h3 style='color:green;'>worked</h3><br>";
 	}
@@ -332,5 +345,7 @@ function success()
 	{
 		echo "<h3 style='color:red;'>failed</h3><br>";
 	}
+	
+	return $worked;
 }
 ?>

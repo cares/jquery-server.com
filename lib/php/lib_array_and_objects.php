@@ -42,7 +42,21 @@ function haspropertyandvalue($objectOrArray,$property,$caller,$displayErrors = f
 			{
 				if(!is_null($objectOrArray->$property))
 				{
-					$result = true;
+					if(!empty($objectOrArray->$property))
+					{
+						$result = true;
+					}
+					else
+					{
+						if($objectOrArray->$property == 0) // in PHP: empty(0) is true, but 0 is also a valid value for class-object->property, "" would be not valid
+						{
+							$result = true;
+						}
+						else
+						{
+							if($displayErrors) error("function ".$caller.": \$objectOrArray has property ".$property." but without value. Argh!");
+						}
+					}
 				}
 				else
 				{

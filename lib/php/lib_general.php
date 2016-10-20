@@ -157,17 +157,26 @@ function logError($error)
 	file_put_contents($settings_errorLog, $error."\n", FILE_APPEND);
 }
 
-/* outputs a warning and if config::get('log_errors') == true, outputs to error.log */
-function error($message)
+/* outputs a warning and if config::get('log_errors') == true, outputs to error.log
+ * 
+ * $message = string that will be output to the client
+ * $type = can be	fatal (default)	= error message will be print and program will be interrupted, no further processing 
+ * 					warning			= error message will be print and program will continue
+ * */
+function error($message,$type = "fatal")
 {
+	$message = "error_type: ".$type.", message: ".$message;
 	trigger_error($message);
 	$log_errors = config::get('log_errors');
 	if(!empty($log_errors))
 	{
 		log2file(config::get('log_errors'),$message);
 	}
-	
-	return false;
+
+	if($type == "fatal")
+	{
+		exit; // exit program, end of processing
+	}
 }
 
 /* outputs a warning and if config::get('log_errors') == true, outputs to error.log */

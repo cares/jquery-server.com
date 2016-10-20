@@ -10,6 +10,7 @@
  * in general:
  
  		yes PHPs interaction with MySQL and any other database is pretty complicated and one tries to simplify, but it's still complicated.
+ 		Simpler =is= always Better.
 
 		mysqli_interface::set('result',null);		// -> mysql-result-pointer, pointing to RAW mysql result of last query, no post-processing (sometimes you can not work directly with that), can be any type
 		mysqli_interface::set('output',null);		// -> data extracted from RAW mysql result, "the result" ready for further processing, can be any type
@@ -108,7 +109,10 @@ class lib_mysqli_commands extends mysqli_interface {
 		return $this->describe($tableName);
 	}
 	
-	/* checks if the user exists */
+	/* checks if the user exists
+	 * 
+	 * $uniqueKey = can be "id","username"
+	 * */
 	public function UserExist($user,$uniqueKey = "id")
 	{
 		$query = "";
@@ -178,9 +182,6 @@ class lib_mysqli_commands extends mysqli_interface {
 			{
 				$query = "SELECT * FROM `".config::get("db_auth_table")."` WHERE `".$uniqueKey."` = '".$user_string."'";
 			}
-			
-			
-			
 		}
 		else
 		{
@@ -192,8 +193,6 @@ class lib_mysqli_commands extends mysqli_interface {
 			else
 			{
 				$query = "SELECT * FROM `".config::get("db_auth_table")."` ".$where;
-				
-				
 			}
 		}
 	
@@ -204,7 +203,7 @@ class lib_mysqli_commands extends mysqli_interface {
 	
 		return mysqli_interface::get('output');
 	}
-	
+
 	/* returns an array of all groups available (if no parameter given)
 	 *
 	* if $group given -> get $group as assoc-array
@@ -231,9 +230,6 @@ class lib_mysqli_commands extends mysqli_interface {
 				}
 				// filter list
 				$query = "SELECT * FROM `".config::get("db_groups_table")."` WHERE `".$uniqueKey."` = '".$group_string."'";
-				
-				
-				
 			}
 		}
 		else
@@ -367,31 +363,19 @@ class lib_mysqli_commands extends mysqli_interface {
 	
 	/* add/register a new user
 	 *
-	* the properties a $user-array-object can have is defined through the database
-	* (table defined in config/config.php -> config::get("db_auth_table") e.g. passwd)
-	*
-	* add a column there, and you have a new property attached to $user.
+	* the properties of a user-object is defined by the structure of the database table 'passwd' (as defined in config/config.php)
 	*
 	* To create/add a $user you first need to get this database-defined-layout
 	*
 	* $user = NewUser();
-	*
 	* Then you modify the array: username is required, anything else is optional.
-	*
 	* $user->username= "user";
-	*
-	* adduser($user);
-	*
+
+	* UserAdd($user);
 	* That's it!
 	* */
 	public function UserAdd($user) // $requested_username = "",$requested_password = "",$groups = "",$data = ""
 	{
-		if(!haspropertyandvalue($user, "username", "UserAdd"))
-		{
-			mysqli_interface::set('worked',false);
-			return mysqli_interface::get('worked');
-		}
-	
 		// check if user allready exists
 		if(config::get('uniqueUsernames'))
 		{
@@ -400,14 +384,14 @@ class lib_mysqli_commands extends mysqli_interface {
 				return error("function UserAdd: can not continue, user ".$user->username." is taken and \config::get('uniqueUsernames') is set to true.");
 			}
 		}
-	
+
 		// under linux, when creating users there is always a a group created with the same name, that per default this user belongs to (it's "his" group)
 		// search for username in groups, if not found add.
 		if(empty($user->home))
 		{
 			$user->home = config::get('default_home_after_login');
 		}
-	
+
 		// Create a unique activation code:
 		$user->activation = salt();
 	
@@ -416,7 +400,7 @@ class lib_mysqli_commands extends mysqli_interface {
 		$group = $this->NewGroup();
 		$group->groupname = $user->username;
 	
-		if(!$this->GroupExist($group))
+		if(!$this->GroupExist($group)) // this looks like double-checking, because GroupAdd() does an GroupExist() check too, but GroupAdd() outputs errors.  
 		{
 			$this->GroupAdd($group);
 		}
@@ -438,8 +422,6 @@ class lib_mysqli_commands extends mysqli_interface {
 		$values = arrayobject2sqlvalues($user,"INSERT");
 		$query = "INSERT INTO `".config::get("db_name")."`.`".config::get("db_auth_table")."` ".$values;
 		
-		
-	
 		$temp = config::get('mysqli_object') -> query($query);
 	
 		// get the id of the just created user-object
@@ -478,13 +460,10 @@ class lib_mysqli_commands extends mysqli_interface {
 		$values = arrayobject2sqlvalues($UpdatedUser,"UPDATE");
 	
 		$query = "UPDATE `".config::get("db_name")."`.`".config::get("db_auth_table")."` SET ".$values." WHERE `".config::get("db_auth_table")."`.`".$uniqueKey."` = '".$UpdatedUser->$uniqueKey."';";
-		
-		
-		
 	
-		$temp = config::get('mysqli_object') -> query($query);
+		config::get('mysqli_object')->query($query); // its an UPDATE sql command, so no result except "success" expected.
 	
-		return $temp;
+		return mysqli_interface::set('worked',true);
 	}
 	
 	/* ============ GROUP */
@@ -511,15 +490,23 @@ class lib_mysqli_commands extends mysqli_interface {
 	* */
 	public function GroupAdd($group,$systemgroup = 0)
 	{
-		if(!haspropertyandvalue($group, "groupname", "GroupAdd"))
+		if(!isset($group->groupname))
 		{
 			mysqli_interface::set('worked',false);
-			return mysqli_interface::get('worked');
+			error("function GroupAdd: No groupname given - can not add Group to database.");
 		}
-	
+		else
+		{
+			if(empty($group->groupname))
+			{
+				mysqli_interface::set('worked',false);
+				error("function GroupAdd: No groupname given - can not add Group to database.");
+			}
+		}
+
 		// under linux, when creating groups there is always a a group created with the same name, that per default this group belongs to (it's "his" group)
 		// check if given groups already exist, if not add
-		if(!$this->GroupExist($group,"groupname"))
+		if(!$this->GroupExist($group))
 		{
 			// search for groupname in groups, if not found add.
 			// allready contains groupname in group-list
@@ -528,9 +515,6 @@ class lib_mysqli_commands extends mysqli_interface {
 	
 			$values = arrayobject2sqlvalues($group,"INSERT");
 			$query = "INSERT INTO `".config::get("db_name")."`.`".config::get("db_groups_table")."` ".$values;
-			
-			
-			
 	
 			$temp = config::get('mysqli_object') -> query($query);
 			// get the id of the just created group-object
@@ -540,8 +524,8 @@ class lib_mysqli_commands extends mysqli_interface {
 		}
 		else
 		{
-			$temp = "function GroupAdd: group allready exists.";
-			return error($temp);
+			$temp = "function GroupAdd: can not create group \"".$group."\" allready exists.";
+			return error($temp,"warning");
 		}
 	
 		return $group;
@@ -562,7 +546,7 @@ class lib_mysqli_commands extends mysqli_interface {
 		$UpdatedGroup = mergeObject($UpdatedGroup,$group_database);
 	
 		// if $settings_uniqueGroupnames enabled -> check if groupname is allready in use/exists
-		if($this->GroupExist($UpdatedGroup,"groupname"))
+		if($this->GroupExist($UpdatedGroup))
 		{
 			return error("function GroupEdit: can not rename group from ".$group_database->groupname." to ".$UpdatedGroup->groupname." because the groupname is allready in use.");
 		}
@@ -570,14 +554,10 @@ class lib_mysqli_commands extends mysqli_interface {
 		$values = arrayobject2sqlvalues($UpdatedGroup,"UPDATE");
 	
 		$query = "UPDATE `".config::get("db_name")."`.`".config::get("db_groups_table")."` SET ".$values." WHERE `".config::get("db_groups_table")."`.`".$uniqueKey."` = '".$UpdatedGroup->$uniqueKey."';";
-		
-		
-		
 	
-		$temp = config::get('mysqli_object') -> query($query);
-		mysqli_interface::set('feedback',$temp);
+		config::get('mysqli_object')->query($query); // its an UPDATE sql command, so no result except "success" expected
 
-		return $temp;
+		return mysqli_interface::set('worked',true);
 	}
 	
 	/* get $group as assoc-array
@@ -602,18 +582,12 @@ class lib_mysqli_commands extends mysqli_interface {
 				}
 				// filter list
 				$query = "SELECT * FROM `".config::get("db_groups_table")."` WHERE `".$uniqueKey."` = '".$group_string."'";
-				
-				
-				
 			}
 		}
 		else
 		{
 			// return all groups
 			$query = "SELECT * FROM `".config::get("db_groups_table")."`";
-			
-			
-			
 		}
 	
 		$group_array = config::get('mysqli_object')->query($query);
@@ -696,9 +670,6 @@ class lib_mysqli_commands extends mysqli_interface {
 			{
 				$query = "DELETE FROM `".config::get("db_name")."`.`".config::get("db_groups_table")."` WHERE `".config::get("db_groups_table")."`.`".$IdentifyBy."` = '".$group->$IdentifyBy."';";
 				
-				
-				config::set("db_lastColumn",$IdentifyBy);
-	
 				$result = config::get('mysqli_object') -> query($query);
 			}
 		}
@@ -734,6 +705,7 @@ class lib_mysqli_commands extends mysqli_interface {
 	 *
 	* you can either pass a $group object with ->groupname set, or the name of the group as string
 	*
+	* $uniqueKey = can be id, groupname, any property that you can uniquely identify a group by
 	* alternative way to do it:
 	* $groups = groups(null,"WHERE `groupname` = '".$user->username."'");
 	* if(!empty($groups))
@@ -742,7 +714,7 @@ class lib_mysqli_commands extends mysqli_interface {
 	* }
 	* -> then check if $groups array is empty.
 	* */
-	public function GroupExist($group,$uniqueKey = "id")
+	public function GroupExist($group,$uniqueKey = "groupname")
 	{
 		if(is_string($group))
 		{
@@ -757,149 +729,64 @@ class lib_mysqli_commands extends mysqli_interface {
 		}
 	
 		$query = "SELECT * FROM `".config::get("db_groups_table")."` WHERE `".$uniqueKey."` = '".$group->$uniqueKey."'";
+	
+		$temp = config::get('mysqli_object')->query($query);
 		
+		if(empty($temp))
+		{
+			$temp = false;
+		}
+		else
+		{
+			$temp = true;
+		}
 		
-	
-		$result_array = config::get('mysqli_object')->query($query);
-	
-		if($result_array)
+		mysqli_interface::set('output',$temp);
+		return $temp;
+	}
+
+	/* get all groups of given user(s) */
+	public function GetGroupsOfUser($user = null)
+	{
+		if(is_null($user))
 		{
-			config::set('result', true);
+			mysqli_interface::set('worked',false);
+			return error("function GetGroupsOfUser: parameter \$user missing.");
 		}
-	
-		return config::get('result');
-	}
-	
-	/* output all users of a given group as selectable <html> list
-	 *
-	// if $goup == * -> all users of all groups are
-	// if $goup == "users" -> all users that are not admin
-	// if $goup == "yourself" -> the currently logged in user
-	*/
-	/*
-	 function generateUserList($group = "*")
-	 {
-	if(($group == "*") || ($group == "users"))
-	{
-	$users = $this->users();
-	}
-	else if($group == "yourself")
-	{
-	global $user;
-	$users[] = $user;
-	}
-	else
-	{
-	$users = getUsersByGroup($group); // must be replaced with something like: $users = users($user,"groups");
-	}
-	if($group == "*") $group = "All Users:";
-	echo '
-	<h4>'.$group.'</h4>
-	<ul data-role="listview">';
-	
-	// paint a list of users
-	foreach($users as $key => $user)
-	{
-	$paint = true;
-	
-	// if $goup == users -> all users that are not admin
-	if($group == "users")
-	{
-	$groups_of_element = getGetGroupsOfUser($user);
-	if(in_array("admins",$groups_of_element))
-	{
-	$paint = false;
-	}
-	}
-		
-	if($paint)
-	{
-	$data = string2array($user->data);
-	if(!isset($data['profilepicture']))
-	{
-	$data['profilepicture'] = "";
-	}
-	echo '
-	<li>
-	<input type="checkbox" class="checkbox" name="checkbox_'.$user->username.'" id="checkbox_'.$user->username.'" data-mini="true" value="0" userid="'.$user->id.'"/>
-	<a href="frontend_UserEdit.php?selectUserId='.$user->id.'" rel="external" data-ajax="false">
-	<img id="profilepicture'.$user->id.'" src="'.$data['profilepicture'].'" class="profilepicture"/>
-	<h3 id="username'.$user->id.'">'.$user->username.'</h3>
-	<p>UserID:'.$user->id.','.$user->data.'</p>
-	</a>
-	</li>';
-	}
-	}
-	echo '
-	</ul>';
-	}
-	*/
-	
-	/* get all groups of given user(s) as
-	 * -> $result_mode = "objects" array of database-objects
-	* -> $result_mode = "strings" */
-	public function GetGroupsOfUser($user = null,$result_mode = "objects")
-	{
-		$result = Array();
-		$query = "";
-	
-		$users = $this->users($user); // in case we got no $user->groups info
-	
-		if(is_object($users))
+		else
 		{
-			// if only one user given make it an array
-			$users_array[] = $users;
-			$users = $users_array;
+			$groups = $user->groups;
+
+			$groups = rtrim($groups, ","); // remove trailing commas, trim($string, ",") would remove trailing and leading commas 
+				
+			$temp = explode(",",$groups);
+			$temp = array_unique($temp); // there actually should be no duplicates 
 		}
-	
-		if($result_mode == "objects")
+
+		mysqli_interface::set('worked',true);
+		mysqli_interface::set('output',$temp);
+
+		return $temp;
+	}
+
+	/* get all users that belong to the given group */
+	public function GetUsersOfGroup($groupname)
+	{
+		if(is_null($groupname))
 		{
-			$target = count($users);
-			for($i=0;$i<$target;$i++)
-			{
-				$groups = $users[$i]->groups;
-				$groups_array = explode(",",$groups);
-				$groups_array = array_filter( $groups_array, 'strlen' );
-	
-				$targetj = count($groups_array);
-				for($j=0;$j<$target;$j++)
-				{
-					$group = $groups_array[$j];
-					if($j == 0)
-					{
-						$query = $query . "SELECT * FROM `".config::get("db_groups_table")."` WHERE `groupname` = '".$group."'";
-					}
-					else
-					{
-						$query = $query . "UNION SELECT * FROM `".config::get("db_groups_table")."` WHERE `groupname` = '".$group."'";
-					}
-					
-					
-					config::set("db_lastColumn","groupname");
-				}
-			}
-	
-			$result = config::get('mysqli_object')->query($query);
+			mysqli_interface::set('worked',false);
+			return error("function GetUsersOfGroup: parameter \$groupname missing.");
 		}
-	
-		if($result_mode == "strings")
+		else
 		{
-			$target = count($users);
-			for($i=0;$i<$target;$i++)
-			{
-				$groups = $users[$i]->groups;
-				$groups_array = explode(",",$groups);
-				$groups_array = array_filter( $groups_array, 'strlen' );
-	
-				for($j=0;$j<$target;$j++)
-				{
-					$result[] = $groups_array[$j];
-				}
-			}
-			$result = array_unique($result);
+			$query = "SELECT * FROM `".config::get("db_auth_table")."` WHERE `groups` LIKE '%".$groupname."%'";
+			$temp = config::get('mysqli_object')->query($query);
+				
+			mysqli_interface::set('worked',true);
+			mysqli_interface::set('output',$temp);
 		}
-	
-		return mysqli_interface::get('output');
+
+		return $temp;
 	}
 	
 	/* GroupAddUser - add user to a group */
@@ -975,21 +862,19 @@ class lib_mysqli_commands extends mysqli_interface {
 	*
 	* That's it!
 	* */
-	public function RecordAdd($record,$table = null) // $requested_recordname = "",$requested_password = "",$groups = "",$data = ""
+	public function RecordAdd($table = null,$record) // $requested_recordname = "",$requested_password = "",$groups = "",$data = ""
 	{
 		if(is_null($table))
 		{
-			return error("function RecordAdd: no parameter \$table given.");
+			return error("function RecordAdd: parameter \$table missing.");
 		}
-
+		
 		$query = "";
-		/* -----defaults-end----- */
 	
 		$record->id = ""; // id will always be automatically set by database/backend/autoincrement, or things will become chaotic
 	
 		$values = arrayobject2sqlvalues($record,"INSERT");
 		$query = "INSERT INTO `".config::get("db_name")."`.`".$table."` ".$values;
-		
 	
 		$temp = config::get('mysqli_object') -> query($query);
 	
@@ -997,29 +882,24 @@ class lib_mysqli_commands extends mysqli_interface {
 		$record->id = mysqli_interface::get('last_id');
 	
 		mysqli_interface::set('worked',true);
-		mysqli_interface::set('feedback',$temp);
 	
-		return $temp;
+		return mysqli_interface::get('worked',true);
 	}
 	
 	/* edit/update/change a record
 	 */
-	public function RecordEdit($UpdatedRecord,$uniqueKey = "id",$table = null)
+	public function RecordEdit($table = null,$UpdatedRecord,$uniqueKey = "id")
 	{
 		if(is_null($table))
 		{
-			$table = config::get("db_lastTable");
+			return error("function RecordEdit: parameter \$table missing.");
 		}
-		else
-		{
-			config::set("db_lastTable",$table);
-		}
-
+		
 		$query = "";
-		/* -----defaults-end----- */
 	
 		// get all info about record
-		$record_database = $this->records($UpdatedRecord,$uniqueKey);
+		$record_database_array = $this->records($table, $UpdatedRecord,$uniqueKey);
+		$record_database = getFirstElementOfArray($record_database_array);
 	
 		// merge it
 		$UpdatedRecord = mergeObject($UpdatedRecord,$record_database);
@@ -1027,11 +907,9 @@ class lib_mysqli_commands extends mysqli_interface {
 		$values = arrayobject2sqlvalues($UpdatedRecord,"UPDATE");
 		$query = "UPDATE `".config::get("db_name")."`.`".$table."` SET ".$values." WHERE `".$table."`.`".$uniqueKey."` = '".$UpdatedRecord->$uniqueKey."';";
 		
+		config::get('mysqli_object') -> query($query);
 	
-		$temp = config::get('mysqli_object') -> query($query);
-		mysqli_interface::set('feedback',$temp);
-	
-		return $temp;
+		return mysqli_interface::get('worked',true);
 	}
 	
 	/* delete record
@@ -1046,26 +924,19 @@ class lib_mysqli_commands extends mysqli_interface {
 	* $record->recordname = "joe";
 	* RecordDel($record,"recordname");
 	* */
-	public function RecordDel($record,$IdentifyBy = "id",$table = null)
+	public function RecordDel($table = null, $record,$IdentifyBy = "id")
 	{
+		if(is_null($table))
+		{
+			return error("function RecordDel: parameter \$table missing.");
+		}
+
 		if(!is_object($record))
 		{
 			return error("function RecordDel: expected input \$record to be an object");
 		}
 	
 		$query = "";
-	
-		if(is_null($table))
-		{
-			$table = config::get("db_lastTable");
-		}
-		else
-		{
-			config::set("db_lastTable",$table);
-		}
-
-		$query = "";
-		/* -----defaults-end----- */
 	
 		if(haspropertyandvalue($record,$IdentifyBy,"RecordDel"))
 		{
@@ -1085,19 +956,14 @@ class lib_mysqli_commands extends mysqli_interface {
 	*
 	* via $where you can filter the records you want with your own sql query
 	*/
-	public function records($record = null,$uniqueKey = "id",$where = "",$table = null)
+	public function records($table = null, $record = null,$uniqueKey = "id",$where = "")
 	{
 		if(is_null($table))
 		{
-			$table = config::get("db_lastTable");
+			return error("function records: parameter \$table missing.");
 		}
-		else
-		{
-			config::set("db_lastTable",$table);
-		}
-		
+
 		$query = "";
-		/* -----defaults-end----- */
 	
 		if(!is_null($record))
 		{
@@ -1152,6 +1018,8 @@ class lib_mysqli_commands extends mysqli_interface {
 				$result = $record_array; // multiple records returned
 			}
 		}
+		
+		mysqli_interface::set('output',$result);
 	
 		if(!empty($result)) mysqli_interface::set('worked',true);
 	
