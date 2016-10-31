@@ -212,7 +212,7 @@ success();
 // get all groups with this groupname
 $groupname = "user";
 comment("get all groups with this groupname");
-$groups_array = $lib_mysqli_commands_instance->groups(null,"id","WHERE `groupname` = '".$groupname."'");
+$group = $lib_mysqli_commands_instance->GetGroup($groupname);
 success();
 
 /* ================ modify change data: groups ================ */

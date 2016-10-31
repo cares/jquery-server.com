@@ -531,8 +531,30 @@ class lib_mysqli_commands extends mysqli_interface {
 		return $group;
 	}
 	
+	/* get $Group with it's properties by supplied $groupname
+	*/
+	public function GetGroup($groupname) // $groupID, $requested_groupname = "",$requested_password = "",$groups = "",$data = ""
+	{
+		$groups_array = $this->groups(null,"groupname","WHERE `groupname` = '".$groupname."'");
+		$temp_group = getFirstElementOfArray($groups_array);
+		
+		if($temp_group)
+		{
+			// mysqli_interface::set('worked',true); // is already set to true
+			mysqli_interface::set('output',$temp_group);
+			return $temp_group;
+		}
+		else
+		{
+			mysqli_interface::set('worked',false);	// is already set?
+			mysqli_interface::set('output',null);	// is already set?
+			$temp = "function GetGroup: no group with that groupname \"".$groupname."\" ?";
+			return error($temp,"warning");
+		}
+	}
+
 	/* edit/update/change a group
-	 * $groups = a,comma,separated,list,of,groupnames
+	 * $groups->groupname = the groupname
 	* arbitrary additional details data about the group
 	* data -> $data = "key:value,key:value,"
 	*/
@@ -540,7 +562,7 @@ class lib_mysqli_commands extends mysqli_interface {
 	{
 		// check if group with this groupname allready exists -> warn
 		// get all info about group
-		$group_database = $this->GroupGet($UpdatedGroup,$uniqueKey);
+		$group2update = $this->GetGroup($UpdatedGroup,$uniqueKey);
 	
 		// merge it
 		$UpdatedGroup = mergeObject($UpdatedGroup,$group_database);
@@ -560,57 +582,7 @@ class lib_mysqli_commands extends mysqli_interface {
 		return mysqli_interface::set('worked',true);
 	}
 	
-	/* get $group as assoc-array
-	 * by id, if no $uniqueKey is given (could also be groupname,mail if those values are unique)
-	*/
-	public function GroupGet($group = null,$uniqueKey = "id")
-	{
-		$query = "";
 
-		if(!is_null($group))
-		{
-			if(haspropertyandvalue($group,$uniqueKey,"GroupGet"))
-			{
-				$group_string = "";
-				if(is_array($group))
-				{
-					$group_string = $group[$uniqueKey];
-				}
-				else if(is_object($group))
-				{
-					$group_string = $group->$uniqueKey;
-				}
-				// filter list
-				$query = "SELECT * FROM `".config::get("db_groups_table")."` WHERE `".$uniqueKey."` = '".$group_string."'";
-			}
-		}
-		else
-		{
-			// return all groups
-			$query = "SELECT * FROM `".config::get("db_groups_table")."`";
-		}
-	
-		$group_array = config::get('mysqli_object')->query($query);
-		if(isset($group_array))
-		{
-			if(count($group_array) <= 1)
-			{
-				if(isset($group_array[0]))
-				{
-					$result = $group_array[0];
-				}
-			}
-			else
-			{
-				$result = $group_array; // multiple records returned
-			}
-		}
-	
-		if(!empty($result)) mysqli_interface::set('worked',true);
-	
-		return mysqli_interface::get('output');
-	}
-	
 	/* delete a group
 	 * $IdentifyBy = possible values: "id", "groupname"
 	 * */
