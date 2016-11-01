@@ -148,19 +148,23 @@ function mergeArray($A,$InToArrayB)
 */
 function GetFirstElementOfArray($array)
 {
-	$result = Array();
-	if(isset($array))
+	$temp = Array();
+	if(is_array($array))
 	{
 		if(count($array) <= 1)
 		{
 			if(isset($array[0]))
 			{
-				$result = $array[0];
+				$temp = $array[0];
 			}
 		}
 	}
+	else if(is_object($array))
+	{
+		$temp = $array;
+	}
 
-	return $result;
+	return $temp;
 }
 
 

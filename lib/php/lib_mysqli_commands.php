@@ -531,9 +531,8 @@ class lib_mysqli_commands extends mysqli_interface {
 		return $group;
 	}
 	
-	/* get $Group with it's properties by supplied $groupname
-	*/
-	public function GetGroup($groupname) // $groupID, $requested_groupname = "",$requested_password = "",$groups = "",$data = ""
+	/* get group by $groupname */
+	public function GetGroupByName($groupname)
 	{
 		$groups_array = $this->groups(null,"groupname","WHERE `groupname` = '".$groupname."'");
 		$temp_group = getFirstElementOfArray($groups_array);
@@ -548,40 +547,64 @@ class lib_mysqli_commands extends mysqli_interface {
 		{
 			mysqli_interface::set('worked',false);	// is already set?
 			mysqli_interface::set('output',null);	// is already set?
-			$temp = "function GetGroup: no group with that groupname \"".$groupname."\" ?";
+			$temp = "function GetGroupByName: no group with that groupname \"".$groupname."\" ?";
+			return error($temp,"warning");
+		}
+	}
+
+	/* get group  by $group->id */
+	public function GetGroupByID($groupid)
+	{
+		$groups_array = $this->groups(null,"groupname","WHERE `id` = '".$groupid."'");
+		$temp_group = getFirstElementOfArray($groups_array);
+		
+		if($temp_group)
+		{
+			// mysqli_interface::set('worked',true); // is already set to true
+			mysqli_interface::set('output',$temp_group);
+			return $temp_group;
+		}
+		else
+		{
+			mysqli_interface::set('worked',false);	// is already set?
+			mysqli_interface::set('output',null);	// is already set?
+			$temp = "function GetGroupByID: no group with that id \"".$groupid."\" ?";
 			return error($temp,"warning");
 		}
 	}
 
 	/* edit/update/change a group
-	 * $groups->groupname = the groupname
-	* arbitrary additional details data about the group
-	* data -> $data = "key:value,key:value,"
+	 * for this to work you will first:
+	 * 1. need to $group = $lib_mysqli_commands_instance->GetGroupByName("groupname");
+	 * 2. modify group details (ALL BUT ID!) $group->groupname = "newgroupname";
+	 * 3. run GroupUpdate($group)
 	*/
-	public function GroupEdit($UpdatedGroup,$uniqueKey = "id") // $groupID, $requested_groupname = "",$requested_password = "",$groups = "",$data = ""
+	public function GroupUpdate($group)
 	{
-		// check if group with this groupname allready exists -> warn
-		// get all info about group
-		$group2update = $this->GetGroup($UpdatedGroup,$uniqueKey);
-	
-		// merge it
-		$UpdatedGroup = mergeObject($UpdatedGroup,$group_database);
-	
-		// if $settings_uniqueGroupnames enabled -> check if groupname is allready in use/exists
-		if($this->GroupExist($UpdatedGroup))
+		// test if given group exists
+		$group2change = $this->GetGroupByID($group->id);
+		if($group2change)
 		{
-			return error("function GroupEdit: can not rename group from ".$group_database->groupname." to ".$UpdatedGroup->groupname." because the groupname is allready in use.");
-		}
-	
-		$values = arrayobject2sqlvalues($UpdatedGroup,"UPDATE");
-	
-		$query = "UPDATE `".config::get("db_name")."`.`".config::get("db_groups_table")."` SET ".$values." WHERE `".config::get("db_groups_table")."`.`".$uniqueKey."` = '".$UpdatedGroup->$uniqueKey."';";
-	
-		config::get('mysqli_object')->query($query); // its an UPDATE sql command, so no result except "success" expected
+			$values = arrayobject2sqlvalues($group,"UPDATE");
+			$query = "UPDATE `".config::get("db_name")."`.`".config::get("db_groups_table")."` SET ".$values." WHERE `".config::get("db_groups_table")."`.`id` = '".$group->id."';";
+			config::get('mysqli_object')->query($query); // run the query
 
-		return mysqli_interface::set('worked',true);
+			// check if group was renamed
+			if($group2change->groupname != $group->groupname)
+			{
+				// update groupname in user-table/auth-table (passwd)
+				$query = "UPDATE `".config::get("db_name")."`.`".config::get("db_auth_table")."` SET `groups` = replace(groups, '".$group2change->groupname."', '".$group->groupname."');";
+				config::get('mysqli_object')->query($query); // run the query
+			}
+			
+			return mysqli_interface::get('worked');
+		}
+		else
+		{
+			mysqli_interface::set('worked',false);
+			return error("function GroupUpdate: can not update/modify group, the group with the name \"".$group->groupname."\" and the id: \"".$group->id."\" does not exist.");
+		}
 	}
-	
 
 	/* delete a group
 	 * $IdentifyBy = possible values: "id", "groupname"
@@ -764,7 +787,8 @@ class lib_mysqli_commands extends mysqli_interface {
 	/* GroupAddUser - add user to a group */
 	public function GroupAddUser($user,$group)
 	{
-		$user = $this->users($user); // get groups from database
+		$users = $this->users($user); // get groups from database
+		$user = getFirstElementOfArray($users);
 	
 		$groupname = "";
 	
@@ -790,11 +814,11 @@ class lib_mysqli_commands extends mysqli_interface {
 		return $this->UserEdit($user);
 	}
 	
-	/* GroupDelUser - add user to a group */
+	/* GroupDelUser - delete a user from group
+	 * $group could be "groupname" or $group_object_instance
+	 * */
 	public function GroupDelUser($user,$group)
 	{
-		$user = $this->users($user); // get groups from database
-	
 		$groupname = "";
 	
 		if(is_object($group))
@@ -855,33 +879,23 @@ class lib_mysqli_commands extends mysqli_interface {
 	
 		mysqli_interface::set('worked',true);
 	
-		return mysqli_interface::get('worked',true);
+		return mysqli_interface::get('worked');
 	}
 	
-	/* edit/update/change a record
-	 */
-	public function RecordEdit($table = null,$UpdatedRecord,$uniqueKey = "id")
+	/* edit/update/change/modify a database record */
+	public function RecordEdit($table = null,$Record2Update,$uniqueKey = "id")
 	{
 		if(is_null($table))
 		{
 			return error("function RecordEdit: parameter \$table missing.");
 		}
 		
-		$query = "";
-	
-		// get all info about record
-		$record_database_array = $this->records($table, $UpdatedRecord,$uniqueKey);
-		$record_database = getFirstElementOfArray($record_database_array);
-	
-		// merge it
-		$UpdatedRecord = mergeObject($UpdatedRecord,$record_database);
-	
-		$values = arrayobject2sqlvalues($UpdatedRecord,"UPDATE");
-		$query = "UPDATE `".config::get("db_name")."`.`".$table."` SET ".$values." WHERE `".$table."`.`".$uniqueKey."` = '".$UpdatedRecord->$uniqueKey."';";
+		$values = arrayobject2sqlvalues($Record2Update,"UPDATE");
+		$query = "UPDATE `".config::get("db_name")."`.`".$table."` SET ".$values." WHERE `".$table."`.`".$uniqueKey."` = '".$Record2Update->$uniqueKey."';";
 		
 		config::get('mysqli_object') -> query($query);
 	
-		return mysqli_interface::get('worked',true);
+		return mysqli_interface::get('worked');
 	}
 	
 	/* delete record

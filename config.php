@@ -57,8 +57,8 @@ config::set("db_name",config::get('platform_name'));	# the database one will dea
 config::set("db_charset","utf8");						# if you want special chars to be properly displayed in the database/phpmyadmin etc.
 config::set("db_user","root");							# what database user to use for accessing the database
 config::set("db_pass","root");							# what database password to use for accessing the database
-config::set("db_auth_table","passwd"); 					# name of table where platform's usernames & passwords (md5 hashed) are stored
-config::set("db_groups_table","groups");				# what the table is called, where the groups are stored
+config::set("db_auth_table","passwd"); 					# name of table where platform's usernames & passwords (md5 hashed) are stored (passwd)
+config::set("db_groups_table","groups");				# what the table is called, where the groups are stored (groups)
 
 // will be reset to defaults before every query of database
 config::set("db_result",null);							# -> mysql-result-pointer, pointing to RAW mysql result of last query, no post-processing (sometimes you can not work directly with that), can be any type

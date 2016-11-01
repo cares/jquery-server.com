@@ -212,23 +212,24 @@ success();
 // get all groups with this groupname
 $groupname = "user";
 comment("get all groups with this groupname");
-$group = $lib_mysqli_commands_instance->GetGroup($groupname);
+$group = $lib_mysqli_commands_instance->GetGroupByName($groupname);
 success();
 
 /* ================ modify change data: groups ================ */
 
 // groupchange, also update the name in all user records!!!
-comment("GroupEdit");
+comment("GroupUpdate");
 $group->groupname = "changedTest";
 $group->mail = "groupA@mail.com";
-success($lib_mysqli_commands_instance->GroupEdit($group));
+success($lib_mysqli_commands_instance->GroupUpdate($group));
 
 // GroupAddUser - add user to a group
 comment("GroupAddUser - add user to a group");
 success($lib_mysqli_commands_instance->GroupAddUser($user,$group));
 
-// groupremuser - remove user from group
-comment("groupremuser - remove user from group");
+// GroupDelUser - remove user from group
+comment("GroupDelUser - remove user from group");
+$group->groupname = "others";
 success($lib_mysqli_commands_instance->GroupDelUser($user,$group));
 
 /* ================ delete data: groups ================ */
