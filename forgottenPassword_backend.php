@@ -34,11 +34,11 @@ if(!empty($_REQUEST['mail']))
 		// check if any error
 		if(!$output)
 		{
-			logError('file:'.$settings_current_filename.',type:success,id:edit user successfull,details:The details/Credentials of the user where edited user successfully.');
+			error('file:'.$settings_current_filename.',type:success,id:edit user successfull,details:The details/Credentials of the user where edited user successfully.');
 		}
 		else
 		{
-			logError('file:'.$settings_current_filename.',type:error,id:registration failed,details:'.$output);
+			error('file:'.$settings_current_filename.',type:error,id:registration failed,details:'.$output);
 		}
 
 		$text = translate("Your new password for",$lang).' '.$sett .' <a href="'.$settings_platform_url.'">'.$settings_platform_url.'</a> '.translate("Password",$lang).': '. $pwd;

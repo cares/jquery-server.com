@@ -151,12 +151,6 @@ function generatePassword($length = 8) {
     return $result;
 }
 
-/* write the error to a log file */
-function logError($error)
-{
-	file_put_contents($settings_errorLog, $error."\n", FILE_APPEND);
-}
-
 /* outputs a warning and if config::get('log_errors') == true, outputs to error.log
  * 
  * $message = string that will be output to the client

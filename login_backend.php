@@ -16,10 +16,11 @@ if(!empty($_REQUEST['username']) && !empty($_REQUEST['password_encrypted']))
 	// old way:
 	// $user = getUserByUsername($_REQUEST['username']);
 	// new way:
-	$lib_mysqli_commands_instance = new lib_mysqli_commands();
+	$lib_mysqli_commands_instance = new lib_mysqli_commands(config::get("db_name"));
 	$user = $lib_mysqli_commands_instance->NewUser();
 	$user->username = $_REQUEST['username'];
-	$user = getFirstElementOfArray(users($user,"username"));
+	$users = $lib_mysqli_commands_instance->users($user,"username");
+	$user = getFirstElementOfArray($users);
 	
 	if(!empty($user)) // check if username exists
 	{
@@ -29,7 +30,7 @@ if(!empty($_REQUEST['username']) && !empty($_REQUEST['password_encrypted']))
 		{
 			// password is correct
 			session_start();
-			SetSession($_REQUEST['username'],$_REQUEST['password_encrypted']);
+			$lib_mysqli_commands_instance->SetSession($_REQUEST['username'],$_REQUEST['password_encrypted']);
 			
 			if(config::get('login_session_timeout') > 0)
 			{

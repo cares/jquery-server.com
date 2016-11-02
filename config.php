@@ -48,7 +48,7 @@ config::set('log_operations'	, '');						# leave empty string here if you do not
 config::set('uniqueUsernames'	, true);					# please leave this at true, otherwise UserEdit may fail, true: two users can NOT have the same username, false: two users can have the same username (identification is mainly done over an unique database generated id)
 
 /* ======================= DEVELOPMENT */
-config::set('debugMode',		true);						# if you want additional info about whats going on. will also perserve xdebug ?Session parameters.
+config::set('debug_mode',		true);						# if you want additional info about whats going on. will also perserve xdebug ?Session parameters.
 
 /* ======================= DATABASE */
 config::set("db_srv_address","localhost");				# address of database server
