@@ -26,4 +26,5 @@ if($_REQUEST["get"] == "settings")
 
 	echo json_encode($settings);
 }
+// test
 ?>
