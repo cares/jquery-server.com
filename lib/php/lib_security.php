@@ -21,13 +21,17 @@
 * per default all incoming arguments are mysql-real-escaped, so this should prevent an sql injection input form.
  */
 
-if(!class_exists("./lib/php/mysqli_interface"))
+// include lib_general.php, should be on top of every file
+if(file_exists('lib_general.php')) { require_once('lib_general.php'); } else { if(file_exists('./lib/php/lib_general.php')) { require_once('./lib/php/lib_general.php'); } else { trigger_error(basename(__FILE__, '.php')."-> could not include library lib_general.php, it should be on top of every file.php", E_USER_ERROR); }}
+
+if(!class_exists("mysqli_interface"))
 {
-	require_once('./lib/php/lib_mysqli_interface.php');
+	include_missing_lib("lib_mysqli_interface.php");
 }
 
 // init database
-config::get('mysqli_object') = new mysqli_interface();
+$mysqli_interface_instance = new mysqli_interface(); # create instance from class
+config::set('mysqli_object',$mysqli_interface_instance);
 
 // escape everything
 foreach ($_REQUEST as $key => $value)

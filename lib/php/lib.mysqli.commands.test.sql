@@ -1,3 +1,24 @@
+-- phpMyAdmin SQL Dump
+-- version 3.4.11.1deb2
+-- http://www.phpmyadmin.net
+--
+-- Host: localhost
+-- Generation Time: Sep 29, 2016 at 06:48 PM
+-- Server version: 5.5.31
+-- PHP Version: 5.4.4-14+deb7u3
+
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+
+--
+-- Database: `test`
+--
 DROP DATABASE `test`;
 CREATE DATABASE `test` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `test`;
@@ -16,21 +37,6 @@ CREATE TABLE IF NOT EXISTS `datarecord` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=23 ;
 
---
--- Daten für Tabelle `datarecord`
---
-
-INSERT INTO `datarecord` (`id`, `key1`, `key2`, `key3`) VALUES
-(1, 'value1', 'value2', 'value3'),
-(2, 'value1', 'newvalue2', 'newvalue3'),
-(3, 'value1', 'value2', 'value3'),
-(4, 'value1', 'newvalue2', 'newvalue3'),
-(5, 'value1', 'value2', 'value3'),
-(6, 'value1', 'newvalue2', 'newvalue3'),
-(7, 'value1', 'newvalue2', 'newvalue3'),
-(8, 'value1', 'newvalue2', 'newvalue3'),
-(14, 'value1', 'newvalue2', 'newvalue3');
-
 -- --------------------------------------------------------
 
 --
@@ -44,17 +50,6 @@ CREATE TABLE IF NOT EXISTS `groups` (
   `mail` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=341 ;
-
---
--- Daten für Tabelle `groups`
---
-
-INSERT INTO `groups` (`id`, `groupname`, `system`, `mail`) VALUES
-(1, 'root', 1, ''),
-(37, 'username2', 0, ''),
-(36, 'username1', 0, ''),
-(340, 'user', 0, ''),
-(339, 'username', 0, '');
 
 -- --------------------------------------------------------
 
@@ -85,14 +80,6 @@ CREATE TABLE IF NOT EXISTS `passwd` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='stores users, passwords and sessions' AUTO_INCREMENT=233 ;
 
---
--- Daten für Tabelle `passwd`
---
-
-INSERT INTO `passwd` (`id`, `username`, `mail`, `groups`, `password`, `session`, `ip_login`, `ip_during_registration`, `port_during_registration`, `logintime`, `loginexpires`, `activation`, `data`, `status`, `firstname`, `lastname`, `device_during_registration`, `home`, `profilepicture`) VALUES
-(232, 'user', 'mail@mail.de', 'user,', '', '', '', '', '', '', '', 'be9c0a3d41156913d36cf9715ccf63ae', '', '', 'firstname', 'lastname', '', 'frontend_UserManagement.php', ''),
-(231, 'username', 'mail@mail.de', 'username,', '5f4dcc3b5aa765d61d8327deb882cf99', '5217840915ed98901b610f61132a6c56', '::1', '', '', '1379513451', '1381313451', '', '', '', '', '', '', 'UserManagement_frontend.php', '');
-
 -- --------------------------------------------------------
 
 --
@@ -108,18 +95,6 @@ CREATE TABLE IF NOT EXISTS `translations` (
   `es` text NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
-
---
--- Daten für Tabelle `translations`
---
-
-INSERT INTO `translations` (`id`, `keyword`, `en`, `de`, `ru`, `es`) VALUES
-(1, 'hello', 'hello', 'hallo', 'nastrovie', '!ola'),
-(2, 'password forgotten?', 'password forgotten?', 'Passwort vergessen?', 'забыли пароль?', '¿Olvidó su contraseña?'),
-(3, 'Please mail me a new password.', 'Please mail me a new password.', 'Bitte neues Passwort zusenden.', '', ''),
-(4, 'New password for', 'New password for', 'Neues Passwort für', '', ''),
-(5, 'Your new password for', 'Your new password for', 'Ihr neues Passwort für', '', ''),
-(6, 'Password', 'Password', 'Passwort', '', '');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

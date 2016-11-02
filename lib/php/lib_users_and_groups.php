@@ -21,7 +21,7 @@ if(isset($_REQUEST["action"]))
 	if($_REQUEST["action"] == "users")
 	{
 		// comment("get definition of user from database");
-		$user = newUser();
+		$user = NewUser();
 		$users = users($user,$_REQUEST["uniqueKey"],$_REQUEST["uniqueValue"],$_REQUEST["where"]);
 
 		if($users)
@@ -38,7 +38,7 @@ if(isset($_REQUEST["action"]))
 	if($_REQUEST["action"] == "groups")
 	{
 		// comment("get definition of group from database");
-		$group = newGroup();
+		$group = NewGroup();
 		$groups = groups($group,$_REQUEST["uniqueKey"],$_REQUEST["uniqueValue"],$_REQUEST["where"]);
 
 		if($groups)
@@ -53,7 +53,7 @@ if(isset($_REQUEST["action"]))
 	/* create new  user */
 	if($_REQUEST['action'] == "new")
 	{
-		$user = newUser(); // get database layout of an UserObject-Instance (basically all the keys but no values, not a real user record just the layout of it)
+		$user = NewUser(); // get database layout of an UserObject-Instance (basically all the keys but no values, not a real user record just the layout of it)
 		$user->id = $_REQUEST['UserID']; // set the user id of the UserObject-Instance to 0, so we are looking for a user with id == 0
 
 		// now editing/updating the properties
@@ -63,7 +63,7 @@ if(isset($_REQUEST["action"]))
 		$user->password = $_REQUEST['password_encrypted'];
 		$user->groups = $_REQUEST['groups'];
 
-		useradd($user); // returns the user-object from database, containing a new, database generated id, that is important for editing/deleting the user later
+		UserAdd($user); // returns the user-object from database, containing a new, database generated id, that is important for editing/deleting the user later
 
 		global $output;
 
@@ -71,7 +71,7 @@ if(isset($_REQUEST["action"]))
 		{
 			// if there is output on edit -> something is bad -> and $output should contain the error message that is forwareded to the client
 			// answer($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
-			answer(null,"update","failed","failed",$output,"lib_users_and_groups.php: action newUser failed");
+			answer(null,"update","failed","failed",$output,"lib_users_and_groups.php: action NewUser failed");
 		}
 		else
 		{
@@ -82,7 +82,7 @@ if(isset($_REQUEST["action"]))
 	/* update an existing user */
 	if($_REQUEST['action'] == "update")
 	{
-		$user = newUser(); // get database layout of an UserObject-Instance (basically all the keys but no values, not a real user record just the layout of it)
+		$user = NewUser(); // get database layout of an UserObject-Instance (basically all the keys but no values, not a real user record just the layout of it)
 		$user->id = $_REQUEST['UserID']; // set the user id of the UserObject-Instance to 0, so we are looking for a user with id == 0
 		$user = getFirstElementOfArray(users($user)); // now passing this $user[id] to the function users which then extracts a real user with this id.
 
@@ -94,7 +94,7 @@ if(isset($_REQUEST["action"]))
 		$user->groups = $_REQUEST['groups'];
 
 		// writing to database, for more examples please check out: lib_mysqli_commands.test.php
-		useredit($user);
+		UserEdit($user);
 
 		global $output;
 
@@ -102,7 +102,7 @@ if(isset($_REQUEST["action"]))
 		{
 			// if there is output on edit -> something is bad -> and $output should contain the error message that is forwareded to the client
 			// answer($result = null,$action = "",$resultType = "",$resultValue = "",$details = "")
-			answer(null,"update","failed","failed",$output,"lib_users_and_groups.php: useredit/update failed.");
+			answer(null,"update","failed","failed",$output,"lib_users_and_groups.php: UserEdit/update failed.");
 		}
 		else
 		{
@@ -114,9 +114,9 @@ if(isset($_REQUEST["action"]))
 	/* delete user */
 	if($_REQUEST['action'] == "delete")
 	{
-		$user = newUser(); // get database layout of an UserObject-Instance (basically all the keys but no values, not a real user record just the layout of it)
+		$user = NewUser(); // get database layout of an UserObject-Instance (basically all the keys but no values, not a real user record just the layout of it)
 		$user->id = $_REQUEST['UserID']; // set the user id of the UserObject-Instance to 0, so we are looking for a user with id == 0
-		userdel($user);
+		UserDel($user);
 
 		global $output;
 

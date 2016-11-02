@@ -2,6 +2,35 @@
 require_once('lib_array_and_objects.php');
 require_once('lib_convert.php');
 
+/* search and include the missing lib - test if relative or absolute paths are necessary to include the lib */
+function include_missing_lib($lib_name)
+{
+	$current_working_directory = getcwd();
+	
+	if(file_exists ($lib_name))
+	{
+		require_once ($lib_name);
+	}
+	else
+	{
+		if (file_exists ('../../'.$lib_name))
+		{
+			require_once ('../../'.$lib_name);
+		}
+		else
+		{
+			if (file_exists ('./lib/php/'.$lib_name))
+			{
+				require_once ('./lib/php/'.$lib_name);
+			}
+			else
+			{
+				trigger_error ( basename ( __FILE__, '.php' ) . "-> could not include library ".$lib_name.", it should be on top of every file.php", E_USER_ERROR );
+			}
+		}
+	} // include lib_general.php
+}
+
 /* just very general functions, is included via config.php
  * so that it is available to all files */
 
@@ -10,7 +39,7 @@ require_once('lib_convert.php');
  * name="checkbox_group_users"
  * ... one wants to extract all this group info into one array/object
  */
-function getREQUESTSstarting($with)
+function GetREQUESTSstarting($with)
 {
 	$result = array();
 	$count = strlen($with);
@@ -69,7 +98,7 @@ function answer($result = null,$action = "",$resultType = "",$resultValue = "",$
 /* this takes timestampt, md5-hashes it then cuts it down to 8 characters */
 function salt()
 {
-	$salt = substr(md5(time()), 8); // date("F")
+	$salt = md5(uniqid(rand()*time(), true)); // for security reasons, one tries to be as random as possible here
 	return $salt;
 }
 
@@ -122,38 +151,42 @@ function generatePassword($length = 8) {
     return $result;
 }
 
-/* write the error to a log file */
-function logError($error)
+/* outputs a warning and if config::get('log_errors') == true, outputs to error.log
+ * 
+ * $message = string that will be output to the client
+ * $type = can be	fatal (default)	= error message will be print and program will be interrupted, no further processing 
+ * 					warning			= error message will be print and program will continue
+ * */
+function error($message,$type = "fatal")
 {
-	file_put_contents($settings_errorLog, $error."\n", FILE_APPEND);
-}
-
-/* outputs a warning and if $settings_log_errors == true, outputs to error.log */
-function error($message)
-{
+	$message = "error_type: ".$type.", message: ".$message;
 	trigger_error($message);
-
-	global $settings_log_errors;
-	global $worked;
-	$worked = false;
-	if(!empty($settings_log_errors)){
-		log2file($settings_log_errors,$message);
+	$log_errors = config::get('log_errors');
+	if(!empty($log_errors))
+	{
+		log2file(config::get('log_errors'),$message);
 	}
-	
-	return false;
+
+	if($type == "fatal")
+	{
+		exit; // exit program, end of processing
+	}
 }
 
-/* outputs a warning and if $settings_log_errors == true, outputs to error.log */
+/* outputs a warning and if config::get('log_errors') == true, outputs to error.log */
 function operation($operation)
 {
-	global $settings_log_operations;
-	if(!empty($settings_log_operations)){
-		log2file($settings_log_operations,$operation);
+	$log_operations = config::get('log_operations');
+	if(!empty($log_operations))
+	{
+		log2file(config::get('log_operations'),$operation);
 	}
 }
 
 /* write the error to a log file */
 function log2file($file,$this)
 {
-	file_put_contents($file, time().": ".$this."\n", FILE_APPEND);
+	$line = time().": ".$this."\n";
+	$cwd = getcwd();
+	file_put_contents($file, $line, FILE_APPEND);
 }

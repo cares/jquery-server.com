@@ -11,12 +11,10 @@
 
 // 0. init database
 require_once("config/config.php");
-global $settings_datasource;
-if($settings_datasource == "mysql")
+if(config::get("db_datasource") == "mysql")
 {
 	require_once('./lib/php/lib_mysqli_commands.php');
 
-	global config::get('mysqli_object');
 	if(!class_exists("mysqli"))
 	{
 		require_once('mysqli.php');
@@ -78,7 +76,7 @@ if(!$open_to_all) // no further check if you shall pass
 	else
 	{
 		// the session variable exists, let's check it's valid:
-		$user = getUserBySession($_SESSION['session']);
+		$user = GetUserBySession($_SESSION['session']);
 			
 		if(!$user)
 		{
@@ -86,7 +84,7 @@ if(!$open_to_all) // no further check if you shall pass
 			header("Location: servermessages/session_expired.php");
 		}
 
-		$valid_until = getSessionExpiration($_SESSION['session'],$user);
+		$valid_until = GetSessionExpiration($_SESSION['session'],$user);
 			
 		// check if the user is allowed to access this page
 	}
@@ -121,7 +119,7 @@ if(!$open_to_all) // no further check if you shall pass
 	if($session_valid == true)
 	{
 		// is used by the calling file
-		$groups = getGroupsOfUser($user);
+		$groups = GetGroupsOfUser($user);
 
 		if(!$open_to_all_logged_in_users)
 		{

@@ -22,8 +22,11 @@ function AddToArrayIfNotExist($array1,$array2)
 
 /* check if an object or array has an an property, and if that property has an value
  * 
- * if $displayErrors = true
- * you will get error messages in your html-output
+ * input:
+ * $objectOrArray	= the Object or Array to check on
+ * $property 		= check $objectOrArray if this $property exists
+ * $caller			= this is just relevant for the a more detailed error message 
+ * $displayErrors	= if true, you will get error messages in your html-output
  * */
 function haspropertyandvalue($objectOrArray,$property,$caller,$displayErrors = false)
 {
@@ -39,7 +42,21 @@ function haspropertyandvalue($objectOrArray,$property,$caller,$displayErrors = f
 			{
 				if(!is_null($objectOrArray->$property))
 				{
-					$result = true;
+					if(!empty($objectOrArray->$property))
+					{
+						$result = true;
+					}
+					else
+					{
+						if($objectOrArray->$property == 0) // in PHP: empty(0) is true, but 0 is also a valid value for class-object->property, "" would be not valid
+						{
+							$result = true;
+						}
+						else
+						{
+							if($displayErrors) error("function ".$caller.": \$objectOrArray has property ".$property." but without value. Argh!");
+						}
+					}
 				}
 				else
 				{
@@ -129,21 +146,25 @@ function mergeArray($A,$InToArrayB)
 /* sometimes when querying the database, only a single result is returned but encapsulated in an array
  * for easier further processing it is necessary to extract it.
 */
-function getFirstElementOfArray($array)
+function GetFirstElementOfArray($array)
 {
-	$result = Array();
-	if(isset($array))
+	$temp = Array();
+	if(is_array($array))
 	{
 		if(count($array) <= 1)
 		{
 			if(isset($array[0]))
 			{
-				$result = $array[0];
+				$temp = $array[0];
 			}
 		}
 	}
+	else if(is_object($array))
+	{
+		$temp = $array;
+	}
 
-	return $result;
+	return $temp;
 }
 
 
@@ -175,9 +196,6 @@ function mergeObject($A,$InToObjectB)
 * */
 function arrayobject2sqlvalues($ArrayOrObject,$mode)
 {
-	config::get('database')['name'];
-	global $config_database_auth_table; global $config_database_groups_table;
-	
 	$query = "";
 	$count = 0;
 	

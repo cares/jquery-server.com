@@ -45,7 +45,7 @@ class mysqli_interface extends config {
 		self::$mysqli_interface[$key] = $value;
 	}
 	
-	public static function get( $key ) {
+	public static function Get( $key ) {
 		if( mysqli_interface::isKeySet( $key ) ) {
 			return isset( self::$mysqli_interface[$key] ) ? self::$mysqli_interface[$key] : null;
 		}
@@ -77,87 +77,103 @@ class mysqli_interface extends config {
 	2 = Array [5]
 	...
 	*
-	* $return_data -> true or false
 	* true means: parse the mysql-result and return all data that is there (select = read)
 	* false means: i do not expect any data to be returned (insert/update does not read any data)
 	*/
-	public static function query($query,$return_data = true)
+	public static function query($query)
 	{
-		mysqli_interface::set('output',array());
-		mysqli_interface::set('worked',false);
-		mysqli_interface::set('id_last','');
-		$mysqli_link = mysqli_interface::get('mysqli_link');
-		mysqli_interface::get('mysqli_object');
-		config::get('database')['name']['server'];
-		config::get('database')['name']['user'];
-		config::get('database')['name']['pass'];
-		config::get('database')['name']['datasource'];
+ 		/* in general:
+ 		yes PHPs interaction with MySQL and any other database is pretty complicated and one tries to simplify, but it's still complicated */
+		
+		// reset to defaults for every query
+		mysqli_interface::set('result',null);		// -> mysql-result-pointer, pointing to RAW mysql result of last query, no post-processing (sometimes you can not work directly with that), can be any type
+		mysqli_interface::set('output',null);		// -> data extracted from RAW mysql result, "the result" ready for further processing, can be any type
+		mysqli_interface::set('feedback','');		// -> contains message to client e.g. the last detailed success/error message, it is structured like this: "type:error,id:unique_id_of_feedback_message,details:"." Selecting database failed: ".mysqli_connect_error() so the JavaScript-client can display it
+		// id:unique_id_of_feedback_message -> you could have error messages translated into different languages, but i guess that is a lot of work and it is more important to focus on precise error messages that actually help debug the problem. Most programmers should know some english.
+		mysqli_interface::set('worked',false);		// -> this is the status of the last query possible values are true (worked) false (failed, mysql error will be thrown)
+		mysqli_interface::set('last_id','');		// -> if there was an insert, return the auto-generated id of the record inserted.
 
+		$records = Array();							// -> temporary storage of result or output
+
+		$mysqli_link = mysqli_interface::get('mysqli_link');
+		// mysqli_interface::get('mysqli_object');
+
+		// try to detect a CREATE DATABASE
 		$detectCreateDatabase = substr($query, 0, 15);
 		if("CREATE DATABASE" == $detectCreateDatabase)
 		{
-			$result = true;
+			// yes -> there is no database to select
+			mysqli_interface::set('result',true);
 		}
 		else
 		{
-			$result = $mysqli_link->select_db(config::get('database')['name']);
+			// no -> select database defined/set in config.php before applying the query
+			mysqli_interface::set('result',$mysqli_link->select_db(config::get("db_name")));
 		}
 
-		if(!$result)
+		if(!mysqli_interface::get('result'))
 		{
 			// could not select database, something went wrong
-			$worked = false;
-			mysqli_interface::set('worked', false); // status, if the last query was successfull (true) or failed (false)
-
-			// check if database exists
-			$query = "SHOW DATABASES;";
-			$result = mysqli_query($query);
-			// $id_last = mysqli_insert_id($mysqli_link);
-
-			$output = "type:error,id:select_db failed,details:"." Selecting database failed: ".mysqli_connect_error();
-			trigger_error($output);
+			mysqli_interface::set('worked',false); // status, if the last query was successfull (true) or failed (false)
+			mysqli_interface::set('feedback',"type:error,id:select_db failed,details:"." Selecting database failed, does database ".config::get("db_name")." exist?: ".mysqli_connect_error());
+			trigger_error(mysqli_interface::get('feedback'));
 		}
 		else
 		{
 			// 2. execute query, check for query errors
-			$result = mysqli_query($mysqli_link,$query);
-			mysqli_interface::set('result',$result);
-			$id_last = mysqli_insert_id($mysqli_link);
-			mysqli_interface::set('id_last',$id_last);
+			mysqli_interface::set('result',mysqli_query($mysqli_link,$query));
+			$last_id = mysqli_insert_id($mysqli_link);
 
-			if(!$result)
+			// was the query successful?
+			if(!mysqli_interface::get('result'))
 			{
+				// no
 				$error = $query." returns error: ".mysqli_errno($mysqli_link). ": ".mysqli_error($mysqli_link);
 				$error = str_replace(",", " ", $error);
 				$error = str_replace(":", " ", $error);
-				$settings_datasource = str_replace(",", " ", $settings_datasource);
-				$settings_datasource = str_replace(":", " ", $settings_datasource);
+				
+				// just for correct decoding of the message on client side, remove all possible delimiters from 'datasource' (mysql)
+				$temp = config::get("db_datasource");
+				$temp = str_replace(",", " ", $temp);
+				$temp = str_replace(":", " ", $temp);
 
-				$output = 'type:error,id:database error,details:'.$error.',datasource:'.$settings_datasource;
-				mysqli_interface::set('output',$output);
-				trigger_error($output);
+				// mysqli_interface::set('result',null);	// -> mysql-result-pointer, pointing to RAW mysql result of last query, no post-processing (sometimes you can not work directly with that), can be any type
+				mysqli_interface::set('feedback','type:error,id:database error,details:'.$error.',datasource:'.$temp); // -> contains message to client e.g. the last detailed success/error message.
+				mysqli_interface::set('worked',false);		// -> this is the status of the last query possible values are true (worked) false (failed, mysql error will be thrown)
+				mysqli_interface::set('last_id',$last_id);	// -> if there was an insert, return the auto-generated id of the record inserted.
+
+				trigger_error(mysqli_interface::get('feedback')); // send error to output
 			}
-
-			if($return_data)
+			else
 			{
-				$worked = true;
-				if(!is_bool($result)) // query(UPDATE) = returns true/false
+				// yes
+				// try to detect if query is returning data (DROP pr CREATE DATABASE will not return any data, neither will any UPDATE command)
+				if(!is_bool(mysqli_interface::get('result'))) // query(UPDATE) = returns no data just true/false (status if sql-command worked or not)
 				{
-					while ($obj = $result->fetch_object()) {
-						$output[] = $obj;
+					// while ($record = mysqli_interface::get('result')->fetch_object()) // probably the same
+					while ($record = mysqli_fetch_object(mysqli_interface::get('result')))
+					{
+						$records[] = $record;
 					}
-					mysqli_free_result($result);
+					/*
+						mysqli_result::free -- mysqli_free_result — Frees the memory associated with a result
+						You should always free your result with mysqli_free_result(),
+						when your result object is not needed anymore.
+						
+						http://php.net/manual/de/mysqli-result.free.php
+					*/
+					mysqli_interface::set('output',$records);	// -> data extracted from RAW mysql result, "the result" ready for further processing, can be any type
+					mysqli_free_result(mysqli_interface::get('result'));
 				}
+
+				// mysqli_interface::set('result',null);	// -> mysql-result-pointer, pointing to RAW mysql result of last query, no post-processing (sometimes you can not work directly with that), can be any type
+				mysqli_interface::set('feedback','type:success,id:query_successful,details: database query ran without errors');// -> contains message to client e.g. the last detailed success/error message.
+				mysqli_interface::set('worked',true);		// -> this is the status of the last query possible values are true (worked) false (failed, mysql error will be thrown)
+				mysqli_interface::set('last_id',$last_id);	// -> if there was an insert, return the auto-generated id of the record inserted.
 			}
 		}
 
-		// save
-		
-		mysqli_interface::set('output',$output); // contains message to client e.g. the last success/error message
-		mysqli_interface::set('worked', $worked); // status, if the last query was successfull (true) or failed (false)
-		mysqli_interface::set('result', $result); // result / data returned of last query
-		
-		return $output; // return
+		return $records; // return mysql data records
 	}
 
 	/* filter evil characters that could make mysql stumble or return a file that contains the whole database
@@ -166,21 +182,23 @@ class mysqli_interface extends config {
 	*
 	* do it like this:
 	// init database
-	config::get('mysqli_object') = new mysql("".config::get('database')['name']."");
+	config::get('mysqli_object') = new mysql("".config::get("db_name")."");
 
 	* */
 	function escape($input)
 	{
+		$mysqli_link = mysqli_interface::get('mysqli_link');
 		return mysqli_escape_string($mysqli_link,$input);
 	}
 }
 
-/* this stuff is added here */
-mysqli_interface::set('output',array()); // contains message to client e.g. the last success/error message
-mysqli_interface::set('worked', false); // status, if the last query was successfull (true) or failed (false)
-mysqli_interface::set('result', false); // result / data returned of last query
+/* in general: yes PHPs interaction with MySQL and any other database is pretty complicated and one tries to simplify, but it's still complicated */
+mysqli_interface::set('result',null);		// -> mysql-result-pointer, pointing to RAW mysql result of last query, no post-processing (sometimes you can not work directly with that), can be any type
+mysqli_interface::set('output',null);		// -> data extracted from RAW mysql result, "the result" ready for further processing, can be any type
+mysqli_interface::set('feedback','');		// -> contains message to client e.g. the last detailed success/error message.
+mysqli_interface::set('worked',false);		// -> this is the status of the last query possible values are true (worked) false (failed, mysql error will be thrown)
+mysqli_interface::set('last_id','');		// -> if there was an insert, return the auto-generated id of the record inserted.
 
-mysqli_interface::set('id_last', ''); // the auto-increment id of the last record inserted
 mysqli_interface::set('mysqli_link', null); // a pointer symbolizing the connection to the mysql database, set during construction
 mysqli_interface::set('mysqli_object', null); // this class, which contains functions and objects such as mysqli_interface::get('mysqli_link')
 
@@ -188,23 +206,15 @@ mysqli_interface::set('lastDatabase', '');  // remember database last in use
 mysqli_interface::set('errors', '');
 
 /* init mysql object */
-$config_database = config::get('database');
-
-$mysqli_link = mysqli_connect($config_database["server"], $config_database["user"], $config_database["pass"], $config_database['name']);
+$mysqli_link = mysqli_connect(config::get("db_srv_address"), config::get("db_user"), config::get("db_pass"), config::get("db_datasource"));
 mysqli_interface::set('mysqli_link', $mysqli_link); // save for later reuse
-$mysqli_link->set_charset($config_database["charset"]);
+$mysqli_link->set_charset(config::get("db_charset"));
 
 if (!$mysqli_link)
 {
 	// something went wrong, find out what and send back details to jquery-ajax-request
 	$error_details = mysqli_connect_errno().":".mysqli_connect_error();
-	mysqli_interface::set('output','type:error,id:mysqli_connect failed,details:'.$error_details);
-	exit(mysqli_interface::get('output'));
+	mysqli_interface::set('feedback','type:error,id:mysqli_connect failed,details:'.$error_details);
+	exit(mysqli_interface::get('feedback'));
 }
-else
-{
-	mysqli_interface::set( 'lastDatabase', $config_database["name"]);  // contains message to client e.g. the last success/error message
-}
-
-
 ?>

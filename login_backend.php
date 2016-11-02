@@ -16,9 +16,11 @@ if(!empty($_REQUEST['username']) && !empty($_REQUEST['password_encrypted']))
 	// old way:
 	// $user = getUserByUsername($_REQUEST['username']);
 	// new way:
-	$user = newUser();
+	$lib_mysqli_commands_instance = new lib_mysqli_commands(config::get("db_name"));
+	$user = $lib_mysqli_commands_instance->NewUser();
 	$user->username = $_REQUEST['username'];
-	$user = getFirstElementOfArray(users($user,"username"));
+	$users = $lib_mysqli_commands_instance->users($user,"username");
+	$user = getFirstElementOfArray($users);
 	
 	if(!empty($user)) // check if username exists
 	{
@@ -28,9 +30,9 @@ if(!empty($_REQUEST['username']) && !empty($_REQUEST['password_encrypted']))
 		{
 			// password is correct
 			session_start();
-			setSession($_REQUEST['username'],$_REQUEST['password_encrypted']);
+			$lib_mysqli_commands_instance->SetSession($_REQUEST['username'],$_REQUEST['password_encrypted']);
 			
-			if($settings_login_session_timeout > 0)
+			if(config::get('login_session_timeout') > 0)
 			{
 				$home = "";
 				if(isset($user->home))
@@ -42,17 +44,17 @@ if(!empty($_REQUEST['username']) && !empty($_REQUEST['password_encrypted']))
 					}
 					else
 					{
-						$home = $settings_default_home_after_login;
+						$home = config::get('default_home_after_login');
 					}
 				}
 				else
 				{
-					$home = $settings_default_home_after_login;
+					$home = config::get('default_home_after_login');
 				}
 
 				$result["goto"] = $home; // header("Location: ".$home);
-				$result["expires"] = seconds2minutes($settings_login_session_timeout);
-				answer($result,"login","success","success","you have now access. live long and prosper! Login expires in ".seconds2minutes($settings_login_session_timeout)." minutes.");
+				$result["expires"] = seconds2minutes(config::get('login_session_timeout'));
+				answer($result,"login","success","success","you have now access. live long and prosper! Login expires in ".seconds2minutes(config::get('login_session_timeout'))." minutes.");
 			}
 			else
 			{

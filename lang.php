@@ -18,7 +18,7 @@ class lang {
 	}
 
 	/************ GETTER AND SETTER ************/ 
-	public function getLang() {
+	public function GetLang() {
 		return $this->lang;
 	}
 	

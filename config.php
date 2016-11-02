@@ -1,11 +1,16 @@
 <?php
 /* TODO:
  * do not use GLOBAL variables to store MySQL database & username credentials... possible security flaw.
-*
-* 		// also test: $this->translation_type = "database"; // specify path and filename (have a look at translations.php) or "database" which means, the translations for all texts will be stored in database
-* */
+ *
+ * also test: $this->translation_type = "database"; // specify path and filename (have a look at translations.php) or "database" which means, the translations for all texts will be stored in database
+ **/
 
 class config {
+	
+	function __construct()
+	{
+		// nothing here
+	}
 
     private static $config = array();
 
@@ -35,31 +40,41 @@ class config {
 // set valuable values
 
 /* ======================= ABOUT THE PLATFORM */
-config::set('platform_name', 'jqueryserver.com');
-config::set('platform_logo', 'images/projectlogo.png');
-config::set('platform_url', 'http://jqueryserver.com');
-config::set('log_errors', 'log.errors.txt'); // if empty, no errors are logged to file
-config::set('log_operations', 'log.operations.txt'); // if empty, no errors are logged to file
-config::set('uniqueUsernames', true); // please leave this at true, otherwise useredit may fail, true: two users can NOT have the same username, false: two users can have the same username (identification is mainly done over an unique database generated id)
+config::set('platform_name'		, 'jqueryserver.com');		# name of the platform (may appear in title="" tag
+config::set('platform_logo'		, 'images/projectlogo.png');# logo of platform
+config::set('platform_url'		, 'http://jqueryserver.com'); # base-url of platform
+config::set('log_errors'		, './log/errors_platform.log'); # put empty string here if you do not want errors to get logged to file
+config::set('log_operations'	, '');						# leave empty string here if you do not want database operations to be logged, per default only errors are logged. you could put log.operations.txt here
+config::set('uniqueUsernames'	, true);					# please leave this at true, otherwise UserEdit may fail, true: two users can NOT have the same username, false: two users can have the same username (identification is mainly done over an unique database generated id)
 
 /* ======================= DEVELOPMENT */
-config::set('debugMode', true); // if you want additional info about whats going on. will also perserve xdebug ?Session parameters.
-
-config::set('debugMode', true); // if you want additional info about whats going on. will also perserve xdebug ?Session parameters.
+config::set('debug_mode',		true);						# if you want additional info about whats going on. will also perserve xdebug ?Session parameters.
 
 /* ======================= DATABASE */
-config::set('database', array(
-		"datasource" => "mysql", // right now can only be "mysql", could be postgress (not implemented) sqlite (not implemented)
-		"server" => "localhost",
-		"charset" => "utf8", // if you want special chars to be properly displayed in the database/phpmyadmin etc.
-		"name" => config::get('platform_name'),
-		"user" => "root",
-		"pass" => "root",
-		"auth_table" => "passwd", // what the table is called, where the users & passwords (md5 hashes) are stored
-		"groups_table" => "groups", // what the table is called, where the groups are stored
-		"lastDatabase" => "",
-		"lastTable" => ""
-));
+config::set("db_srv_address","localhost");				# address of database server
+config::set("db_datasource","mysql");					# right now can only be "mysql", could be postgress (not implemented) sqlite (not implemented)
+config::set("db_name",config::get('platform_name'));	# the database one will deal with, for conveniance same name as platform
+config::set("db_charset","utf8");						# if you want special chars to be properly displayed in the database/phpmyadmin etc.
+config::set("db_user","root");							# what database user to use for accessing the database
+config::set("db_pass","root");							# what database password to use for accessing the database
+config::set("db_auth_table","passwd"); 					# name of table where platform's usernames & passwords (md5 hashed) are stored (passwd)
+config::set("db_groups_table","groups");				# what the table is called, where the groups are stored (groups)
+
+// will be reset to defaults before every query of database
+config::set("db_result",null);							# -> mysql-result-pointer, pointing to RAW mysql result of last query, no post-processing (sometimes you can not work directly with that), can be any type
+config::set("db_output",null);							# -> data extracted from RAW mysql result, "the result" ready for further processing, can be any type
+config::set('db_log_errors', './log/errors_db.log');		# put empty string here if you do not want database query errors to be logged
+config::set("feedback","");								# -> contains message to client e.g. the last detailed success/error message, it is structured like this: "type:error,id:unique_id_of_feedback_message,details:"." Selecting database failed: ".mysqli_connect_error() so the JavaScript-client can display it
+// id:unique_id_of_feedback_message -> you could have error messages translated into different languages, but i guess that is a lot of work and it is more important to focus on precise error messages that actually help debug the problem. Most programmers should know some english.
+config::set("db_worked",false);							# -> this is the status of the last query possible values are true (worked) false (failed, mysql error will be thrown)
+config::set("db_last_id",'');							# -> if there was an insert, return the auto-generated id of the record inserted.
+
+/* will hold the link to mysql, as soon as it is initialized like this:
+ * 
+ * config::set('database')['name'] = "MyDataBaseName"; // overwrite settings from config.php
+ * $lib_mysqli_commands_instance = new lib_mysqli_commands(); # create instance from class
+ * */ 
+config::set('mysqli_object',new stdClass());
 
 /* set all config in one big array-go (overwriting the config::set('key','value'); lines
 config::setAll( array(
@@ -71,7 +86,7 @@ config::setAll( array(
 /* ======================= USERS */
 /* ================ DEFAULTS */
 
-// $settings_default_home_after_login = "frontend_template.php"; // redirect all users, that have no home:somefile.php set in data field of passwd table, to this file after login
+// config::get('default_home_after_login') = "frontend_template.php"; // redirect all users, that have no home:somefile.php set in data field of passwd table, to this file after login
 config::set('default_home_after_login', "manage.users.php"); // redirect all users, that have no home:somefile.php set in data field of passwd table, to this file after login
 config::set('translations_source', "./lang.translations.php"); // specify path and filename (have a look at translations.php) or "database" which means, the translations for all texts will be stored in database
 // also test: $this->translation_type = "database"; // specify path and filename (have a look at translations.php) or "database" which means, the translations for all texts will be stored in database
@@ -79,7 +94,7 @@ config::set('translations_source', "./lang.translations.php"); // specify path a
 /* ======================= UPLOADS */
 /* ================ GENERAL */
 config::set('upload_allowedExtensions', array("gif", "jpeg", "jpg", "png"));
-config::set('upload_maximumFileSize', 2048);
+config::set('upload_maximumFileSize', 4096);				# in KBytes, per default 4MByte maximum file size for upload
 
 /* ================ PROFILE PICTURES */
 config::set('profilepicture_upload_dir', "images/profilepictures/");

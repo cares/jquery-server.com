@@ -1,0 +1,70 @@
+1476385802: function UserDel: expected input $user to be an object
+1476385842: function UserDel: expected input $user to be an object
+1476385842: function UserDel: expected input $user to be an object
+1476626213: function UserDel: expected input $user to be an object
+1476626213: function UserDel: expected input $user to be an object
+1476626213: function UserDel: expected input $user to be an object
+1476626293: function UserDel: expected input $user to be an object
+1476626293: function UserDel: expected input $user to be an object
+1476626293: function UserDel: expected input $user to be an object
+1476626492: function UserDel: expected input $user to be an object
+1476626492: function UserDel: expected input $user to be an object
+1476626492: function UserDel: expected input $user to be an object
+1476626509: function UserDel: expected input $user to be an object
+1476626509: function UserDel: expected input $user to be an object
+1476626509: function UserDel: expected input $user to be an object
+1476626614: function UserDel: expected input $user to be an object
+1476626614: function UserDel: expected input $user to be an object
+1476626614: function UserDel: expected input $user to be an object
+1476626617: function UserDel: expected input $user to be an object
+1476626617: function UserDel: expected input $user to be an object
+1476626617: function UserDel: expected input $user to be an object
+1476626651: function UserDel: expected input $user to be an object
+1476626651: function UserDel: expected input $user to be an object
+1476626651: function UserDel: expected input $user to be an object
+1476626679: function UserDel: expected input $user to be an object
+1476626679: function UserDel: expected input $user to be an object
+1476626679: function UserDel: expected input $user to be an object
+1476626959: function UserDel: expected input $user to be an object
+1476626959: function UserDel: expected input $user to be an object
+1476626959: function UserDel: expected input $user to be an object
+1476627054: function UserDel: expected input $user to be an object
+1476627054: function UserDel: expected input $user to be an object
+1476627054: function UserDel: expected input $user to be an object
+1476627180: function UserDel: expected input $user to be an object
+1476627180: function UserDel: expected input $user to be an object
+1476627180: function UserDel: expected input $user to be an object
+1476627351: function UserDel: expected input $user to be an object
+1476627351: function UserDel: expected input $user to be an object
+1476627351: function UserDel: expected input $user to be an object
+1476627542: function RecordAdd: no parameter $table given.
+1476628178: function arrayobject2sqlvalues: input is of type NULL array or object expected.
+1476628241: function RecordDel: expected input $record to be an object
+1476628299: function arrayobject2sqlvalues: input is of type NULL array or object expected.
+1476628299: function RecordDel: expected input $record to be an object
+1476633113: function GroupAdd: No groupname given - can not add Group to database.
+1476633258: function GroupAdd: No groupname given - can not add Group to database.
+1476633258: function arrayobject2sqlvalues: input is of type NULL array or object expected.
+1476633264: function GroupAdd: No groupname given - can not add Group to database.
+1476633326: function GroupAdd: No groupname given - can not add Group to database.
+1476633534: function GroupAdd: No groupname given - can not add Group to database.
+1476633579: function GroupAdd: No groupname given - can not add Group to database.
+1476642377: function GroupAdd: group allready exists.
+1476643402: function GroupAdd: group allready exists.
+1476643415: error_type: warning, message: function GroupAdd: group allready exists.
+1476643601: error_type: warning, message: function GroupAdd: group allready exists.
+1476643846: error_type: warning, message: function GroupAdd: group allready exists.
+1476643920: error_type: warning, message: function GroupAdd: group allready exists.
+1476643948: error_type: warning, message: function GroupAdd: group allready exists.
+1476644053: error_type: warning, message: function GroupAdd: group allready exists.
+1476644216: error_type: warning, message: function GroupAdd: group allready exists.
+1476644453: error_type: warning, message: function GroupAdd: group allready exists.
+1476992171: error_type: warning, message: function GroupAdd: group allready exists.
+1476992269: error_type: warning, message: function GroupAdd: group allready exists.
+1476992440: error_type: warning, message: function GroupAdd: group allready exists.
+1476992477: error_type: warning, message: function GroupAdd: group allready exists.
+1476992482: error_type: warning, message: function GroupAdd: group allready exists.
+1476992533: error_type: warning, message: function GroupAdd: group allready exists.
+1476992574: error_type: warning, message: function GroupAdd: group allready exists.
+1476992709: error_type: warning, message: function GroupAdd: group allready exists.
+1476993778: error_type: fatal, message: function GetGroupsOfUser: parameter $group missing.
