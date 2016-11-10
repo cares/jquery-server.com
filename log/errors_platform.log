@@ -68,3 +68,4 @@
 1476992574: error_type: warning, message: function GroupAdd: group allready exists.
 1476992709: error_type: warning, message: function GroupAdd: group allready exists.
 1476993778: error_type: fatal, message: function GetGroupsOfUser: parameter $group missing.
+1478810936: error_type: fatal, message: function UserAdd: can not continue, user mja is taken and \config::get('uniqueUsernames') is set to true.

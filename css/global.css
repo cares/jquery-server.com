@@ -11,8 +11,7 @@
 so that php saves a downsized version of the profile picture here */
 .profilePicture
 {
-	width: 115px;
-	height: 115px;
+	width: 256px;
 }
 /* border surrounding profile picture */
 .profilePictureParent

@@ -52,6 +52,8 @@ require_once 'header.php';
 			?>
 		</div>
 		<form class="form-signin" action="login_backend.php" onsubmit="javascript: return false;">
+			<!-- what backend function to trigger -->
+			<input name="action" value="login" hidden>
 			<h2 class="form-signin-heading">Please sign in</h2>
 			<!-- credentials -->
 			<!-- username input -->
