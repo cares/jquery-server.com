@@ -52,6 +52,8 @@ require_once 'header.php';
 			?>
 		</div>
 		<form class="form-signin" action="login_backend.php" onsubmit="javascript: return false;">
+			<!-- what backend function to trigger -->
+			<input name="action" value="login" hidden>
 			<h2 class="form-signin-heading">Please sign in</h2>
 			<!-- credentials -->
 			<!-- username input -->
@@ -65,6 +67,7 @@ require_once 'header.php';
 				<input type="checkbox" value="remember-me"> Remember me
 			</label>
 			<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+			<a href="register.php" class="btn btn-lg btn-primary btn-block" style="background-color: #76bffe;">register</a>
 			<!-- where errors are displayed (put it directly next to the interactive element, that can produce an error) -->
 			<div class="error_div"></div>
 		</form>

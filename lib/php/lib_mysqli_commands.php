@@ -117,21 +117,24 @@ class lib_mysqli_commands extends mysqli_interface {
 	{
 		$query = "";
 	
-		if(haspropertyandvalue($user,$uniqueKey,"UserExist"))
+		if($user->$uniqueKey)
 		{
 			// filter list
 			$query = "SELECT * FROM `".config::get("db_auth_table")."` WHERE `".$uniqueKey."` = '".$user->$uniqueKey."'";
-		}
-	
-		$user_array = config::get('mysqli_object')->query($query);
-	
-		if(empty($user_array))
-		{
-			mysqli_interface::set('output',false);
+			$user_array = config::get('mysqli_object')->query($query);
+		
+			if(empty($user_array))
+			{
+				mysqli_interface::set('output',false);
+			}
+			else
+			{
+				mysqli_interface::set('output',true);
+			}
 		}
 		else
 		{
-			mysqli_interface::set('output',true);
+			return error("function UserExist: \$user->property ".$uniqueKey." has no value.","warning");
 		}
 	
 		return mysqli_interface::get('output');
@@ -418,6 +421,8 @@ class lib_mysqli_commands extends mysqli_interface {
 		// search for username in groups, if not found add.
 		// allready contains username in group-list
 		$user->id = ""; // id will always be automatically set by database/backend/autoincrement, or things will become chaotic
+		
+		$user->password = hash('sha512', $user->password); # sha512 encode the password
 	
 		$values = arrayobject2sqlvalues($user,"INSERT");
 		$query = "INSERT INTO `".config::get("db_name")."`.`".config::get("db_auth_table")."` ".$values;

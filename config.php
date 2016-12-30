@@ -64,7 +64,7 @@ config::set("db_groups_table","groups");				# what the table is called, where th
 config::set("db_result",null);							# -> mysql-result-pointer, pointing to RAW mysql result of last query, no post-processing (sometimes you can not work directly with that), can be any type
 config::set("db_output",null);							# -> data extracted from RAW mysql result, "the result" ready for further processing, can be any type
 config::set('db_log_errors', './log/errors_db.log');		# put empty string here if you do not want database query errors to be logged
-config::set("feedback","");								# -> contains message to client e.g. the last detailed success/error message, it is structured like this: "type:error,id:unique_id_of_feedback_message,details:"." Selecting database failed: ".mysqli_connect_error() so the JavaScript-client can display it
+config::set("db_errors_output",true);						# true = output errors as html to browser to screen, false = return them as function values for further processing (json encode -> client -> let client display that stuff)
 // id:unique_id_of_feedback_message -> you could have error messages translated into different languages, but i guess that is a lot of work and it is more important to focus on precise error messages that actually help debug the problem. Most programmers should know some english.
 config::set("db_worked",false);							# -> this is the status of the last query possible values are true (worked) false (failed, mysql error will be thrown)
 config::set("db_last_id",'');							# -> if there was an insert, return the auto-generated id of the record inserted.
@@ -87,7 +87,7 @@ config::setAll( array(
 /* ================ DEFAULTS */
 
 // config::get('default_home_after_login') = "frontend_template.php"; // redirect all users, that have no home:somefile.php set in data field of passwd table, to this file after login
-config::set('default_home_after_login', "manage.users.php"); // redirect all users, that have no home:somefile.php set in data field of passwd table, to this file after login
+config::set('default_home_after_login', "home.php"); // redirect all users, that have no home:somefile.php set in data field of passwd table, to this file after login
 config::set('translations_source', "./lang.translations.php"); // specify path and filename (have a look at translations.php) or "database" which means, the translations for all texts will be stored in database
 // also test: $this->translation_type = "database"; // specify path and filename (have a look at translations.php) or "database" which means, the translations for all texts will be stored in database
 

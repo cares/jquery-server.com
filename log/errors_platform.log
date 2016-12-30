@@ -68,3 +68,19 @@
 1476992574: error_type: warning, message: function GroupAdd: group allready exists.
 1476992709: error_type: warning, message: function GroupAdd: group allready exists.
 1476993778: error_type: fatal, message: function GetGroupsOfUser: parameter $group missing.
+1478810936: error_type: fatal, message: function UserAdd: can not continue, user mja is taken and \config::get('uniqueUsernames') is set to true.
+1479125139: error_type: fatal, message: function UserAdd: can not continue, user mj is taken and \config::get('uniqueUsernames') is set to true.
+1479125236: error_type: fatal, message: function UserAdd: can not continue, user mj is taken and \config::get('uniqueUsernames') is set to true.
+1479125328: error_type: fatal, message: function UserAdd: can not continue, user mj is taken and \config::get('uniqueUsernames') is set to true.
+1479125338: error_type: fatal, message: function UserExist: $user->property id has no value.
+1479125398: error_type: fatal, message: function UserExist: $user->property id has no value.
+1479125424: error_type: warning, message: function UserExist: $user->property id has no value.
+1479125435: error_type: warning, message: function UserExist: $user->property id has no value.
+1479125581: error_type: warning, message: function UserExist: $user->property id has no value.
+1479125638: error_type: warning, message: function UserExist: $user->property id has no value.
+1479125704: error_type: warning, message: function UserExist: $user->property id has no value.
+1479125738: error_type: warning, message: function UserExist: $user->property id has no value.
+1479125770: error_type: warning, message: function UserExist: $user->property id has no value.
+1479125798: error_type: warning, message: function UserExist: $user->property id has no value.
+1479125836: error_type: warning, message: function UserExist: $user->property id has no value.
+1479125886: error_type: warning, message: function UserExist: $user->property id has no value.

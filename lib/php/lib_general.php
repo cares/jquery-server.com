@@ -84,7 +84,7 @@ function answer($result = null,$action = "",$resultType = "",$resultValue = "",$
 	{
 		$result = Array();
 	}
-	
+
 	$result["action"] = $action;
 	$result["resultType"] = $resultType;
 	$result["resultValue"] = $resultValue;
@@ -92,6 +92,7 @@ function answer($result = null,$action = "",$resultType = "",$resultValue = "",$
 	
 	// give answer to client
 	echo json_encode($result);
+	exit;
 }
 
 
@@ -160,7 +161,16 @@ function generatePassword($length = 8) {
 function error($message,$type = "fatal")
 {
 	$message = "error_type: ".$type.", message: ".$message;
-	trigger_error($message);
+	
+	if(config::get("db_errors_output") == "json")
+	{
+		answer(null,"register","error","error",$message);
+	}
+	else
+	{
+		trigger_error($message);
+	}
+
 	$log_errors = config::get('log_errors');
 	if(!empty($log_errors))
 	{
@@ -171,6 +181,8 @@ function error($message,$type = "fatal")
 	{
 		exit; // exit program, end of processing
 	}
+	
+	return $message;
 }
 
 /* outputs a warning and if config::get('log_errors') == true, outputs to error.log */
